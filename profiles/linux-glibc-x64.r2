@@ -48,7 +48,9 @@ to ffmpeg/avcodec.h
 # zo uses dir.zigns as base (set by install.sh / .radare2rc.local)
 zo debian/amd64/libc6.zsig
 zo debian/amd64/libgcc.zsig
+zo debian/amd64/libstdc++.zsig
 zo debian/amd64/libssl.zsig
+zo debian/amd64/libcrypto-static.zsig
 zo debian/amd64/zlib.zsig
 zo debian/amd64/libbz2.zsig
 zo debian/amd64/liblzma.zsig
@@ -57,6 +59,14 @@ zo debian/amd64/libmbedtls.zsig
 zo debian/amd64/libcurl.zsig
 zo debian/amd64/libevent.zsig
 zo debian/amd64/libgnutls.zsig
+zo debian/amd64/libprotobuf.zsig
+zo debian/amd64/libsodium.zsig
+zo debian/amd64/libsqlite3.zsig
+zo debian/amd64/libxml2.zsig
+zo debian/amd64/libzstd.zsig
+zo debian/amd64/liblz4.zsig
+zo debian/amd64/libsnappy.zsig
+zo debian/amd64/libpcre2.zsig
 zo debian/amd64/libavformat.zsig
 zo debian/amd64/libavutil.zsig
 

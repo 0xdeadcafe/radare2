@@ -49,6 +49,7 @@ to ffmpeg/avcodec.h
 # ── Load glibc / library signatures ─────────────────────────────────────────
 zo debian/arm64/libc6.zsig
 zo debian/arm64/libgcc.zsig
+zo debian/arm64/libstdc++.zsig
 zo debian/arm64/libssl.zsig
 zo debian/arm64/zlib.zsig
 zo debian/arm64/libbz2.zsig
@@ -58,6 +59,13 @@ zo debian/arm64/libmbedtls.zsig
 zo debian/arm64/libcurl.zsig
 zo debian/arm64/libevent.zsig
 zo debian/arm64/libgnutls.zsig
+zo debian/arm64/libsodium.zsig
+zo debian/arm64/libsqlite3.zsig
+zo debian/arm64/libxml2.zsig
+zo debian/arm64/libzstd.zsig
+zo debian/arm64/liblz4.zsig
+zo debian/arm64/libsnappy.zsig
+zo debian/arm64/libpcre2.zsig
 zo debian/arm64/libavformat.zsig
 zo debian/arm64/libavutil.zsig
 
