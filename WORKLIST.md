@@ -233,3 +233,39 @@ All firmware analysis sessions since corpus creation had zero zsig benefit.
 
 **Fix:** Added `e zign.mincc=1; e zign.minsz=4` to all 40 profiles
 (17 vendor profiles with `zo` lines + 23 others for manual `zo` usage).
+
+---
+
+## Bug Hunt 2026-08-05 Pass 2 — Parser Compatibility Fixes
+
+### B1 -- UTF-8 in type .h files breaks r2 C parser ✅ FIXED
+r2's `to` C parser is byte-by-byte ASCII; UTF-8 multi-byte sequences (em-dashes,
+arrows, quotes) in comments corrupted parser state, silently stopping struct/enum
+parsing mid-file. Affected 14 type files.
+**Fix**: Replaced all non-ASCII with ASCII equivalents across all 39 .h files.
+
+### B2 -- `struct stat` not parsed: function declaration shadows struct name ✅ FIXED
+`int stat(char *pathname, struct stat *statbuf)` in `libc/fcntl.h` and
+`libc/fcntl-arm32.h` caused r2 to register `stat` as a function, clobbering the
+`struct stat` type definition. Same issue in `libc/signal.h` (sigaction) and
+`freebsd/freebsd.h` (kevent). All 4 shadowing conflicts fixed.
+
+### B3 -- `__attribute__((packed))` in type files breaks r2 parser ✅ FIXED
+r2's `to` parser does not support GCC `__attribute__` extensions. Affected 3 files:
+`dji/dji-assistant-win32.h`, `dji/dji-fly-android-arm64.h`, `juniper/srx_httpd_gk.h`.
+All structs in those files were silently skipped. Removed the attribute annotations.
+
+### B4 -- Backslash line continuation in `spacex/starlink.h` ✅ FIXED
+`#define KEY \` + continuation line caused "Cannot find ( in function definition"
+error, aborting parsing of all subsequent types. Joined continuation lines.
+
+### B5 -- `elf-sinks.r2`: wrong filter order in conditionals ✅ FIXED
+Script used `~[1]~NAME` (column-first, then grep) instead of `~NAME~[1]` (grep-first,
+then column). This is the pattern used correctly in `windows-sinks.r2`.
+More critically: consecutive failed `f` commands abort script in r2 6.x. Rewrote
+script to chain all `f sink.NAME @ sym.imp.NAME` commands with semicolons on one line
+per category, bypassing the r2 6.x consecutive-error abort behavior.
+
+### B6 -- Missing top-level `linux-uclibc-arm32.r2` profile ✅ FIXED
+The `libc/uclibc-arm32.r2` sub-profile existed but no standalone top-level profile
+matched the naming convention of `linux-glibc-arm32.r2` etc. Added.

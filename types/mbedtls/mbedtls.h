@@ -133,7 +133,7 @@ enum mbedtls_ssl_verify_mode {
 /* ============================================================================
  * Core structures (opaque types used as pointers in disassembly)
  *
- * These are intentionally simplified — the real structures are large and
+ * These are intentionally simplified -- the real structures are large and
  * architecture-dependent. The key is recognising the type from call context.
  * ============================================================================ */
 
@@ -184,7 +184,7 @@ struct mbedtls_x509_crt {
     /* ... serial, issuer, subject, validity, pk, sig ... */
 };
 
-/* SSL configuration (mbedtls_ssl_config) — first key fields */
+/* SSL configuration (mbedtls_ssl_config) -- first key fields */
 struct mbedtls_ssl_config {
     int endpoint;            /* 0 = server, 1 = client */
     int transport;           /* 0 = TLS stream, 1 = DTLS datagram */
@@ -196,7 +196,7 @@ struct mbedtls_ssl_config {
     /* ... min/max version, ciphersuite list, callbacks ... */
 };
 
-/* SSL context (mbedtls_ssl_context) — first key fields */
+/* SSL context (mbedtls_ssl_context) -- first key fields */
 struct mbedtls_ssl_context {
     void *conf;              /* pointer to mbedtls_ssl_config */
     int state;               /* enum mbedtls_ssl_states */

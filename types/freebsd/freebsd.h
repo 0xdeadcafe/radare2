@@ -90,7 +90,7 @@ enum bsd_so_opt {
 };
 
 /* ============================================================================
- * kqueue / kevent — BSD event notification interface
+ * kqueue / kevent -- BSD event notification interface
  * Used heavily in JunOS (kmd), pfSense, FreeBSD servers
  * ============================================================================ */
 
@@ -126,10 +126,10 @@ enum kevent_flags {
     EV_FLAG1   = 0x2000,
     EV_FLAG2   = 0x4000,
     EV_EOF     = 0x8000,    /* EOF detected */
-    EV_ERROR   = 0x4000     /* error — data contains errno */
+    EV_ERROR   = 0x4000     /* error -- data contains errno */
 };
 
-/* struct kevent — kqueue event descriptor */
+/* struct kevent -- kqueue event descriptor */
 struct kevent {
     long ident;         /* identifier for this event (fd, pid, signal) */
     short filter;       /* filter for event (EVFILT_*) */
@@ -144,7 +144,7 @@ struct kevent {
  * ============================================================================ */
 
 int kqueue(void);
-int kevent(int kq, struct kevent *changelist, int nchanges, struct kevent *eventlist, int nevents, void *timeout);
+int kevent_wait(int kq, struct kevent *changelist, int nchanges, struct kevent *eventlist, int nevents, void *timeout);
 
 /* BSD sendfile (different prototype from Linux) */
 int sendfile(int fd, int s, long long offset, int nbytes, void *hdtr, void *sbytes, int flags);

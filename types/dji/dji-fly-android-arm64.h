@@ -1,6 +1,6 @@
 /*
- * DJI Fly Android ARM64 — SDK type definitions
- * Source: DJI Fly 1.21.2 (dji.go.v5) — libsdk_base.so, libsdk_jni.so, libwaes.so
+ * DJI Fly Android ARM64 -- SDK type definitions
+ * Source: DJI Fly 1.21.2 (dji.go.v5) -- libsdk_base.so, libsdk_jni.so, libwaes.so
  * Discovered: 2026-05-06
  *
  * Usage: to dji/dji-fly-android-arm64.h
@@ -8,7 +8,7 @@
 
 /* ---- Whitebox AES Keychain ---- */
 /* RELA-populated at load time; accessed via get_key_chain_info(index) */
-typedef struct __attribute__((packed)) {
+typedef struct {
     uint8_t  *ciphertext;    /* pointer to encrypted buffer (in LOAD2) */
     uint32_t  len;           /* plaintext length (48 for most creds)  */
     uint32_t  pad;
@@ -42,7 +42,7 @@ typedef enum {
  * WAES_decrypt_real(input, output, table@0x7416a0):
  *   1. InvShiftRows: perm = [0,13,10,7,4,1,14,11,8,5,2,15,12,9,6,3]
  *   2. S-box pass1:  output[i] = table[i*256 + shifted[i]]  (offsets 0x000-0xfff)
- *   3. mix_shift(output, sp_buf) via PLT → VA 0x34c3e8
+ *   3. mix_shift(output, sp_buf) via PLT -> VA 0x34c3e8
  *      Uses T0@0x213e10, T1@0x213f10, T2@0x214110, T3@0x214010 (MixColumns)
  *   4. S-box pass2:  output[i] = table[0x1000 + i*256 + sp_buf[i]]
  *
@@ -67,7 +67,7 @@ typedef enum {
  *   key_table  = "Y9*PI8B#gD^6Yhd1" (16 bytes at file 0x13dc7)
  *   period     = 8 (set by constructor at VA 0x1ed88)
  *
- * WhiteBoxAES.decryptFromWhiteBox(byte[]) → String:
+ * WhiteBoxAES.decryptFromWhiteBox(byte[]) -> String:
  *   AES-128-CBC via separate WAES table at VA 0x49110
  *   IV loaded from VA 0x127e0
  */
@@ -79,6 +79,6 @@ typedef enum {
  * Fields:   app_name, app_version, device_sn, os_platform, sign
  * app_name: "dji_fly"  (confirmed: passes server whitelist)
  * sign:     HMAC-SHA1(key, app_version + app_name + device_sn + os_platform)
- * key:      BLOCKED — likely from WhiteBoxAES.decryptFromWhiteBox in DEX bytecode
+ * key:      BLOCKED -- likely from WhiteBoxAES.decryptFromWhiteBox in DEX bytecode
  *           OR from a different keychain index (not yet identified)
  */

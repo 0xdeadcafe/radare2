@@ -1,7 +1,7 @@
 /*
- * vxworks.h — VxWorks 7 type definitions for radare2
+ * vxworks.h -- VxWorks 7 type definitions for radare2
  *
- * Platform: VxWorks 7 (Wind River RTOS) — x86-64, ARM32, AArch64, MIPS
+ * Platform: VxWorks 7 (Wind River RTOS) -- x86-64, ARM32, AArch64, MIPS
  * Common targets: maritime VSAT modems, avionics, industrial controllers,
  *                 network appliances (Icom AP-90M, JRC, Navico)
  *
@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* ─── Basic VxWorks typedefs ───────────────────────────────────────────────── */
+/* --- Basic VxWorks typedefs ------------------------------------------------- */
 
 typedef int             STATUS;         /* OK=0, ERROR=-1 */
 typedef int             BOOL;           /* TRUE=1, FALSE=0 */
@@ -40,7 +40,7 @@ typedef unsigned short  USHORT;
 #define TRUE    1
 #define FALSE   0
 
-/* ─── Task / semaphore types ──────────────────────────────────────────────── */
+/* --- Task / semaphore types ------------------------------------------------ */
 
 typedef int     TASK_ID;        /* task identifier */
 typedef void *  SEM_ID;         /* semaphore identifier */
@@ -62,7 +62,7 @@ enum vx_task_prio {
     VX_PRIO_LOW  = 255            /* lowest */
 };
 
-/* ─── Error codes (errno) ─────────────────────────────────────────────────── */
+/* --- Error codes (errno) --------------------------------------------------- */
 
 /* VxWorks errno values are POSIX + vendor-specific in the 0x3?xxxx range */
 enum vx_errno {
@@ -73,9 +73,9 @@ enum vx_errno {
     S_netLib_INVALID_ARGUMENT       = 0x00035201
 };
 
-/* ─── Network (BSD socket compat) ─────────────────────────────────────────── */
+/* --- Network (BSD socket compat) ------------------------------------------- */
 
-/* VxWorks socket address family — same as POSIX on most BSPs */
+/* VxWorks socket address family -- same as POSIX on most BSPs */
 enum vx_af {
     AF_UNSPEC   = 0,
     AF_INET     = 2,
@@ -97,7 +97,7 @@ struct sockaddr {
     char    sa_data[14];
 };
 
-/* ─── I/O system ──────────────────────────────────────────────────────────── */
+/* --- I/O system ------------------------------------------------------------ */
 
 /* VxWorks ioctl request codes */
 enum vx_ioctl {
@@ -109,7 +109,7 @@ enum vx_ioctl {
     FIOGETNAME  = 0x00006f25    /* get name of fd */
 };
 
-/* ─── VxWorks-specific kernel services ───────────────────────────────────── */
+/* --- VxWorks-specific kernel services ------------------------------------- */
 
 /* taskSpawn() priority, options flags */
 enum vx_task_options {
@@ -132,7 +132,7 @@ enum vx_task_state {
     PEND_S      = 0x05
 };
 
-/* ─── syslog / logLib ─────────────────────────────────────────────────────── */
+/* --- syslog / logLib ------------------------------------------------------- */
 
 /* logMsg() priority levels */
 enum vx_log_level {
@@ -146,7 +146,7 @@ enum vx_log_level {
     LOG_DEBUG   = 7
 };
 
-/* ─── Common VxWorks kernel function signatures ───────────────────────────── */
+/* --- Common VxWorks kernel function signatures ----------------------------- */
 
 /* Task control */
 STATUS  taskDelay(int ticks);

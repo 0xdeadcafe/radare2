@@ -35,7 +35,7 @@ enum IRQn_cortex_m {
 };
 
 /* ============================================================================
- * NVIC — Nested Vectored Interrupt Controller
+ * NVIC -- Nested Vectored Interrupt Controller
  * Base: 0xE000E100
  * ============================================================================ */
 
@@ -56,7 +56,7 @@ struct NVIC_Type {
 };
 
 /* ============================================================================
- * SCB — System Control Block
+ * SCB -- System Control Block
  * Base: 0xE000ED00
  * ============================================================================ */
 
@@ -105,7 +105,7 @@ enum SCB_ICSR {
 };
 
 /* ============================================================================
- * SysTick — System Tick Timer
+ * SysTick -- System Tick Timer
  * Base: 0xE000E010
  * ============================================================================ */
 
@@ -125,7 +125,7 @@ enum SysTick_CTRL {
 };
 
 /* ============================================================================
- * MPU — Memory Protection Unit (Cortex-M3/M4/M7)
+ * MPU -- Memory Protection Unit (Cortex-M3/M4/M7)
  * Base: 0xE000ED90
  * ============================================================================ */
 
@@ -144,7 +144,7 @@ struct MPU_Type {
 };
 
 /* ============================================================================
- * DWT — Data Watchpoint and Trace (Cortex-M3/M4/M7)
+ * DWT -- Data Watchpoint and Trace (Cortex-M3/M4/M7)
  * Base: 0xE0001000
  * ============================================================================ */
 
@@ -175,7 +175,7 @@ struct DWT_Type {
 };
 
 /* ============================================================================
- * CoreDebug — Core Debug registers (Cortex-M3/M4/M7)
+ * CoreDebug -- Core Debug registers (Cortex-M3/M4/M7)
  * Base: 0xE000EDF0
  * ============================================================================ */
 
@@ -203,7 +203,7 @@ enum CoreDebug_DHCSR {
 };
 
 /* ============================================================================
- * FPU — Floating Point Unit (Cortex-M4F / M7 with FP extension)
+ * FPU -- Floating Point Unit (Cortex-M4F / M7 with FP extension)
  * Base: 0xE000EF30
  * ============================================================================ */
 
@@ -217,7 +217,7 @@ struct FPU_Type {
 };
 
 /* ============================================================================
- * Peripheral base addresses (reference only — vendor-specific)
+ * Peripheral base addresses (reference only -- vendor-specific)
  * These match the Cortex-M standard address map
  * ============================================================================ */
 

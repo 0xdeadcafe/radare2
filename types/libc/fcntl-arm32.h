@@ -1,5 +1,5 @@
 /*
- * Linux file and time structures for radare2 — ARM32 (armhf / armeabi)
+ * Linux file and time structures for radare2 -- ARM32 (armhf / armeabi)
  *
  * Use this file for ARM32 LE targets (Cortex-A, ARM9, ARM926):
  *   to libc/fcntl-arm32.h
@@ -18,7 +18,7 @@
  *   glibc sysdeps/unix/sysv/linux/arm/bits/stat.h
  */
 
-/* Open flags — same values as x86_64 on ARM32 */
+/* Open flags -- same values as x86_64 on ARM32 */
 enum linux_open_flags {
     O_RDONLY = 0,
     O_WRONLY = 1,
@@ -41,7 +41,7 @@ enum linux_open_flags {
     O_TMPFILE = 4259840
 };
 
-/* File mode bits — same across all architectures */
+/* File mode bits -- same across all architectures */
 enum linux_mode {
     S_IFMT = 61440,
     S_IFSOCK = 49152,
@@ -129,7 +129,7 @@ enum linux_map {
     MAP_HUGETLB = 262144
 };
 
-/* Time structures — use int (32-bit) for long on ARM32 */
+/* Time structures -- use int (32-bit) for long on ARM32 */
 struct timeval {
     int tv_sec;
     int tv_usec;
@@ -231,9 +231,6 @@ int write(int fd, void *buf, int count);
 int pread(int fd, void *buf, int count, long long offset);
 int pwrite(int fd, void *buf, int count, long long offset);
 long long lseek(int fd, long long offset, int whence);
-int stat(char *pathname, struct stat *statbuf);
-int lstat(char *pathname, struct stat *statbuf);
-int fstat(int fd, struct stat *statbuf);
 int access(char *pathname, int mode);
 int faccessat(int dirfd, char *pathname, int mode, int flags);
 int unlink(char *pathname);

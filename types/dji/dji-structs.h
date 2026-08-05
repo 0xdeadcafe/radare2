@@ -200,7 +200,7 @@ struct dji_key_info {
 };
 
 /* ============================================================================
- * DUML Framework (libduml_frwk.so) — Event/DUPC Dispatcher Structures
+ * DUML Framework (libduml_frwk.so) -- Event/DUPC Dispatcher Structures
  * Discovered from: wm240 libduml_frwk.so (8073dc82), 2026-05-05
  * ============================================================================ */
 
@@ -216,7 +216,7 @@ struct duss_event_msg_t {
     int    dst_module;     /* 0x06: destination module ID */
     int    frame_seq;      /* 0x08: frame sequence number (raw[6]) */
     short  flags;          /* 0x0A: command type flags (raw[8]) */
-    int    cmd_id_set;     /* 0x0C: combined (cmd_set << 16) | cmd_id  ← KEY FIELD */
+    int    cmd_id_set;     /* 0x0C: combined (cmd_set << 16) | cmd_id  <- KEY FIELD */
     int    payload_size;   /* 0x10: payload length in bytes */
     char*  payload_ptr;    /* 0x14 (stack var): pointer to payload data */
 };
@@ -230,7 +230,7 @@ struct duss_cmd_desc_t {
     int    flags;             /* 0x08: bit31=async; bit0=requires_resp */
 };
 
-/* DUPC cmd_set identifiers — confirmed by protocol trace strings in libduml_frwk.so */
+/* DUPC cmd_set identifiers -- confirmed by protocol trace strings in libduml_frwk.so */
 enum duss_cmd_set {
     DUSS_CMDSET_GENERAL    = 0x00,
     DUSS_CMDSET_SPECIAL    = 0x01,
@@ -239,9 +239,9 @@ enum duss_cmd_set {
     DUSS_CMDSET_GIMBAL     = 0x04,
     DUSS_CMDSET_CENTER     = 0x05,
     DUSS_CMDSET_RC         = 0x06,
-    DUSS_CMDSET_WIFI       = 0x07,   /* ← P3C cmd injection: cmd_set=0x07, cmd_id=0x10 */
+    DUSS_CMDSET_WIFI       = 0x07,   /* <- P3C cmd injection: cmd_set=0x07, cmd_id=0x10 */
     DUSS_CMDSET_BATTERY    = 0x0A,
     DUSS_CMDSET_ADSB       = 0x0B,
-    DUSS_CMDSET_SYS        = 0x10,   /* ← dji_sys upgrade handlers */
+    DUSS_CMDSET_SYS        = 0x10,   /* <- dji_sys upgrade handlers */
     DUSS_CMDSET_MAX        = 0x23    /* Maximum cmd_set (bounds check in dispatcher) */
 };

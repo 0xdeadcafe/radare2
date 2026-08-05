@@ -169,6 +169,13 @@
     "vendor": "generic",
     "zsigs": true
   },
+  "arm32-uclibc-linux": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "linux-uclibc-arm32.r2 top-level profile; uclibc/arm32/uclibc-libc.zsig (3269 sigs); ARM926EJ-S + ARMv7 soft-float",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
   "mips-cisco": {
     "arch": "mips32-be",
     "profile": true,

@@ -1,7 +1,7 @@
-// Discovered from HTTPD-GK. (270d9123) — JunOS SRX 21.3R1.9
-// DVPN token table entry — fields at known offsets from SA structures
+// Discovered from HTTPD-GK. (270d9123) -- JunOS SRX 21.3R1.9
+// DVPN token table entry -- fields at known offsets from SA structures
 
-typedef struct __attribute__((packed)) {
+typedef struct {
     char     ike_id[0xa8];          // 0x00: IKE identifier string
     char     sa_name[4];            // 0xa8: SA name (used in system() calls)
     char     pad1[0x344];           // 0xac-0x3ef: intermediate fields
@@ -12,7 +12,7 @@ typedef struct __attribute__((packed)) {
     uint8_t  flag_41a;              // 0x41a: branch flag in delete_sa
 } dvpn_sa_entry_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct {
     char     username[64];
     char     token[128];
     char     ike_id[64];

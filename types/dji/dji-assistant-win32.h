@@ -16,7 +16,7 @@
  *   app_name: "dji_assistant"  (confirmed 2026-05-06)
  *   sign key: "QfWWouvQn5TnDO" (HMAC-SHA1, decrypted from DJIUavService.dll)
  * ============================================================================ */
-typedef struct __attribute__((packed)) {
+typedef struct {
     char app_version[16];   /* "2.1.40.0" */
     char app_name[32];      /* "dji_assistant" */
     char device_sn[32];     /* device serial number */

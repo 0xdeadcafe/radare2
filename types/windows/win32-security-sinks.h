@@ -1,5 +1,5 @@
 /*
- * win32-security-sinks.h — Dangerous Windows API function signatures
+ * win32-security-sinks.h -- Dangerous Windows API function signatures
  *
  * Focused subset of Windows API annotated for security research.
  * Includes: command execution, code injection, unsafe string ops,
@@ -12,13 +12,13 @@
  */
 
 /* ============================================================================
- * CMD — Process / Command execution
+ * CMD -- Process / Command execution
  * ============================================================================ */
 
-/* SINK: trivial command injection — no shell escaping */
+/* SINK: trivial command injection -- no shell escaping */
 int WinExec(char *lpCmdLine, int uCmdShow);
 
-/* SINK: process creation — check lpCommandLine and lpApplicationName */
+/* SINK: process creation -- check lpCommandLine and lpApplicationName */
 int CreateProcessA(
     char *lpApplicationName,
     char *lpCommandLine,
@@ -44,18 +44,18 @@ int CreateProcessW(
     void *lpProcessInformation
 );
 
-/* SINK: shell execute — parameter / path injection */
+/* SINK: shell execute -- parameter / path injection */
 long ShellExecuteA(long hwnd, char *lpOperation, char *lpFile, char *lpParameters, char *lpDirectory, int nShowCmd);
 long ShellExecuteW(long hwnd, void *lpOperation, void *lpFile, void *lpParameters, void *lpDirectory, int nShowCmd);
 
-/* SINK: CRT system call — trivial shell injection */
+/* SINK: CRT system call -- trivial shell injection */
 int system(char *command);
 int _wsystem(void *command);
 void *popen(char *command, char *type);
 void *_popen(char *command, char *type);
 
 /* ============================================================================
- * LOAD — DLL / Code injection
+ * LOAD -- DLL / Code injection
  * ============================================================================ */
 
 /* SINK: DLL hijacking if lpLibFileName is user-influenced */
@@ -69,19 +69,19 @@ int WriteProcessMemory(long hProcess, void *lpBaseAddress, void *lpBuffer, long 
 long CreateRemoteThread(long hProcess, void *lpThreadAttributes, long dwStackSize, void *lpStartAddress, void *lpParameter, int dwCreationFlags, void *lpThreadId);
 void *VirtualAllocEx(long hProcess, void *lpAddress, long dwSize, int flAllocationType, int flProtect);
 
-/* SINK: RWX mapping — direct shellcode host */
+/* SINK: RWX mapping -- direct shellcode host */
 void *VirtualAlloc(void *lpAddress, long dwSize, int flAllocationType, int flProtect);
 int VirtualProtect(void *lpAddress, long dwSize, int flNewProtect, void *lpflOldProtect);
 
-/* SINK: global hook — keylogger / injection */
+/* SINK: global hook -- keylogger / injection */
 long SetWindowsHookExA(int idHook, void *lpfn, long hmod, int dwThreadId);
 long SetWindowsHookExW(int idHook, void *lpfn, long hmod, int dwThreadId);
 
 /* ============================================================================
- * COPY — Unsafe string / memory copy (stack/heap overflow)
+ * COPY -- Unsafe string / memory copy (stack/heap overflow)
  * ============================================================================ */
 
-/* SINK: unbounded copies — most common CVE primitive */
+/* SINK: unbounded copies -- most common CVE primitive */
 char *strcpy(char *dest, char *src);
 char *strcat(char *dest, char *src);
 void *gets(char *str);
@@ -103,17 +103,17 @@ char *strncpy(char *dest, char *src, long count);
 char *strncat(char *dest, char *src, long count);
 int strncmp(char *str1, char *str2, long count);
 
-/* Memory copies — check size argument comes from trusted source */
+/* Memory copies -- check size argument comes from trusted source */
 void *memcpy(void *dest, void *src, long count);
 void *memmove(void *dest, void *src, long count);
 void *RtlCopyMemory(void *Destination, void *Source, long Length);
 void *RtlMoveMemory(void *Destination, void *Source, long Length);
 
 /* ============================================================================
- * FMT — Format string sinks
+ * FMT -- Format string sinks
  * ============================================================================ */
 
-/* SINK: no bounds + format string — CVE-class double vulnerability */
+/* SINK: no bounds + format string -- CVE-class double vulnerability */
 int sprintf(char *buffer, char *format, ...);
 int vsprintf(char *buffer, char *format, void *argptr);
 int swprintf(void *buffer, void *format, ...);
@@ -128,10 +128,10 @@ int _snprintf(char *buffer, long count, char *format, ...);
 int _vsnprintf(char *buffer, long count, char *format, void *argptr);
 
 /* ============================================================================
- * NET — Network receive (primary attack surface entry points)
+ * NET -- Network receive (primary attack surface entry points)
  * ============================================================================ */
 
-/* SINK: TCP receive — trace forward to find parser */
+/* SINK: TCP receive -- trace forward to find parser */
 int recv(long s, char *buf, int len, int flags);
 int recvfrom(long s, char *buf, int len, int flags, void *from, void *fromlen);
 
@@ -144,7 +144,7 @@ int InternetReadFile(long hFile, void *lpBuffer, int dwNumberOfBytesToRead, void
 int WinHttpReadData(long hRequest, void *lpBuffer, int dwNumberOfBytesToRead, void *lpdwNumberOfBytesRead);
 
 /* ============================================================================
- * HEAP — Allocators (integer overflow in size argument)
+ * HEAP -- Allocators (integer overflow in size argument)
  * ============================================================================ */
 
 void *malloc(long size);
@@ -157,18 +157,18 @@ void *GlobalAlloc(int uFlags, long uBytes);
 void *CoTaskMemAlloc(long cb);
 
 /* ============================================================================
- * AUTH — Authentication functions (check return value usage)
+ * AUTH -- Authentication functions (check return value usage)
  * ============================================================================ */
 
 int LogonUserA(char *lpszUsername, char *lpszDomain, char *lpszPassword, int dwLogonType, int dwLogonProvider, void *phToken);
 int LogonUserW(void *lpszUsername, void *lpszDomain, void *lpszPassword, int dwLogonType, int dwLogonProvider, void *phToken);
 
-/* CryptAPI signature verification — auth bypass if return ignored */
+/* CryptAPI signature verification -- auth bypass if return ignored */
 int CryptVerifySignature(long hHash, void *pbSignature, int dwSigLen, long hPubKey, void *sDescription, int dwFlags);
 int CryptVerifySignatureA(long hHash, void *pbSignature, int dwSigLen, long hPubKey, char *sDescription, int dwFlags);
 int CryptVerifySignatureW(long hHash, void *pbSignature, int dwSigLen, long hPubKey, void *sDescription, int dwFlags);
 
-/* Comparison functions — timing-safe versions should be used for secrets */
+/* Comparison functions -- timing-safe versions should be used for secrets */
 int memcmp(void *buf1, void *buf2, long count);
 int strcmp(char *str1, char *str2);
 int stricmp(char *str1, char *str2);

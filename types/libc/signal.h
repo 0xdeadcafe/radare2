@@ -67,7 +67,7 @@ struct sigaction {
 
 /* Signal functions */
 void *signal(int signum, void *handler);
-int sigaction(int signum, void *act, void *oldact);
+/* sigaction() - use sigaction struct pointer; decl omitted to avoid shadowing struct sigaction */
 int sigprocmask(int how, void *set, void *oldset);
 int sigpending(void *set);
 int sigsuspend(void *mask);

@@ -11,7 +11,7 @@
  *   tsc lua_Debug          # show debug info struct
  *   te lua_type_tag        # show type constants
  *
- * Note: lua_State is always an opaque pointer in disassembly — recognise it
+ * Note: lua_State is always an opaque pointer in disassembly -- recognise it
  * as the first argument to virtually every Lua C API function.
  */
 
@@ -126,7 +126,7 @@ enum lua_pseudo_index {
 };
 
 /* ============================================================================
- * Debug structure (lua_Debug) — used by lua_getstack / lua_getinfo
+ * Debug structure (lua_Debug) -- used by lua_getstack / lua_getinfo
  * ============================================================================ */
 
 struct lua_Debug {
@@ -147,7 +147,7 @@ struct lua_Debug {
 };
 
 /* ============================================================================
- * luaL_Reg — function table entry for luaL_newlib / luaL_register
+ * luaL_Reg -- function table entry for luaL_newlib / luaL_register
  * ============================================================================ */
 
 struct luaL_Reg {
@@ -156,7 +156,7 @@ struct luaL_Reg {
 };
 
 /* ============================================================================
- * luaL_Buffer — string buffer for luaL_Buffer operations
+ * luaL_Buffer -- string buffer for luaL_Buffer operations
  * ============================================================================ */
 
 struct luaL_Buffer {
@@ -297,7 +297,7 @@ int lua_gethookmask(void *L);
 int lua_gethookcount(void *L);
 
 /* ============================================================================
- * Auxiliary library (luaL_*) — higher-level helpers
+ * Auxiliary library (luaL_*) -- higher-level helpers
  * ============================================================================ */
 
 void luaL_checkversion(void *L);
