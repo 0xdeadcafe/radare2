@@ -22,6 +22,13 @@
     "vendor": "generic",
     "zsigs": true
   },
+  "aarch64-go": {
+    "arch": "aarch64",
+    "note": "linux-go-arm64.r2 + go/arm64/go1.23-stdlib.zsig (40% named, 2947 sigs); go/runtime.h types",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
   "aarch64-hpe": {
     "arch": "aarch64",
     "note": "hpe-ilo7-arm64.r2 created; no zsigs yet (binary not fully analysed)",
@@ -43,6 +50,34 @@
     "profile": true,
     "symbols": true,
     "vendor": "spacex",
+    "zsigs": true
+  },
+  "amd64-go": {
+    "arch": "x86-64",
+    "note": "linux-go-amd64.r2 + go/amd64/go1.23-stdlib.zsig (87% named, 3022 sigs); go/runtime.h types",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "amd64-musl-ppc64le": {
+    "arch": "ppc64le",
+    "note": "linux-musl-ppc64le.r2 + musl/ppc64le/musl-libc.zsig",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "amd64-musl-riscv64": {
+    "arch": "riscv64",
+    "note": "linux-musl-riscv64.r2 + musl/riscv64/musl-libc.zsig",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "amd64-musl-s390x": {
+    "arch": "s390x",
+    "note": "linux-musl-s390x.r2 + musl/s390x/musl-libc.zsig",
+    "profile": true,
+    "vendor": "generic",
     "zsigs": true
   },
   "arm-cobham": {

@@ -36,17 +36,29 @@ to windows/ntstatus.h
 to windows/winerror.h
 
 # ── Load VC++ runtime signatures ─────────────────────────────────────────────
-# zo uses dir.zigns as base (set by install.sh / .radare2rc.local)
-# vcruntime140: core CRT (memcpy, malloc, exception handling)
-# ucrtbase:     Universal CRT functions (printf, fopen, etc.)
-# msvcp140:     C++ stdlib (std::string, std::vector, streams)
-zo windows/x86/vs2022-vcruntime140.zsig
+# Named files first (provide real function names); pattern-only files after.
+# msvcp140:    C++ stdlib (std::string, vector, streams)  -- 30-31% named
+# concrt140:   Concurrency Runtime (thread pool, tasks)   -- 12-14% named
+# vccorlib:    WinRT / C++/CX runtime types               -- 12-13% named
+# vcruntime140 / ucrtbase: core CRT + UCRT               -- 0% named (pattern)
 zo windows/x86/vs2022-msvcp140.zsig
-zo windows/x86/vs2019-vcruntime140.zsig
+zo windows/x86/vs2022-concrt140.zsig
+zo windows/x86/vs2022-vccorlib140.zsig
 zo windows/x86/vs2019-msvcp140.zsig
+zo windows/x86/vs2019-concrt140.zsig
+zo windows/x86/vs2019-vccorlib140.zsig
+zo windows/x86/vs2017-msvcp140.zsig
+zo windows/x86/vs2017-concrt140.zsig
+zo windows/x86/vs2017-vccorlib140.zsig
+zo windows/x86/vs2015-msvcp140.zsig
+zo windows/x86/vs2015-concrt140.zsig
+zo windows/x86/vs2015-vccorlib140.zsig
+zo windows/x86/vs2013-vccorlib120.zsig
+zo windows/x86/vs2012-vccorlib110.zsig
+zo windows/x86/vs2022-vcruntime140.zsig
+zo windows/x86/vs2019-vcruntime140.zsig
 zo windows/x86/vs2017-ucrtbase.zsig
 zo windows/x86/vs2015-ucrtbase.zsig
-zo windows/x86/vs2017-msvcp140.zsig
 zo windows/x86/vs2015-vcruntime140.zsig
 zo windows/x86/vs2013-msvcr120.zsig
 zo windows/x86/vs2012-msvcr110.zsig

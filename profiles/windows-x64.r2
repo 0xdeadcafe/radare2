@@ -37,16 +37,39 @@ to windows/winerror.h
 
 # ── Load VC++ runtime signatures ─────────────────────────────────────────────
 # zo uses dir.zigns as base (set by install.sh / .radare2rc.local)
-# vcruntime140: core CRT (memcpy, malloc, exception handling)
-# ucrtbase:     Universal CRT functions (printf, fopen, etc.)
-# msvcp140:     C++ stdlib (std::string, std::vector, streams)
-zo windows/x64/vs2022-vcruntime140.zsig
+#
+# Zsig quality note (measured 2026-08-05):
+#   Named sigs = entries with real function names (not fcn.XXXXXXXX).
+#   0%-named files still help identify library boundaries via pattern matching;
+#   named files additionally provide actual function names after z/.
+#
+# Named files loaded first so they can set realnames before unnamed matches.
+#
+# msvcp140:    C++ stdlib (std::string, vector, streams)      -- 31-37% named
+# concrt140:   Concurrency Runtime (thread pool, tasks)       -- 15-17% named
+# vccorlib140: WinRT/C++/CX types                            -- 13-19% named
+# msvcp140_2:  Extended C++ stdlib (charconv, regex, etc.)   -- 0% named (pattern)
+# vcruntime140: core CRT exception handling / memcpy         -- 0% named (pattern)
+# ucrtbase:    Universal CRT (printf, fopen, etc.)           -- 0% named (pattern)
 zo windows/x64/vs2022-msvcp140.zsig
-zo windows/x64/vs2019-vcruntime140.zsig
+zo windows/x64/vs2022-concrt140.zsig
+zo windows/x64/vs2022-vccorlib140.zsig
 zo windows/x64/vs2019-msvcp140.zsig
+zo windows/x64/vs2019-concrt140.zsig
+zo windows/x64/vs2019-vccorlib140.zsig
+zo windows/x64/vs2017-msvcp140.zsig
+zo windows/x64/vs2017-concrt140.zsig
+zo windows/x64/vs2017-vccorlib140.zsig
+zo windows/x64/vs2015-msvcp140.zsig
+zo windows/x64/vs2015-concrt140.zsig
+zo windows/x64/vs2015-vccorlib140.zsig
+zo windows/x64/vs2013-vcruntime.zsig
+zo windows/x64/vs2012-vcruntime.zsig
+zo windows/x64/vs2022-vcruntime140.zsig
+zo windows/x64/vs2019-vcruntime140.zsig
+zo windows/x64/vs2019-msvcp140_2.zsig
 zo windows/x64/vs2017-ucrtbase.zsig
 zo windows/x64/vs2015-ucrtbase.zsig
-zo windows/x64/vs2017-msvcp140.zsig
 zo windows/x64/vs2015-vcruntime140.zsig
 zo windows/x64/vs2013-msvcr120.zsig
 zo windows/x64/vs2012-msvcr110.zsig
