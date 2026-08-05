@@ -55,6 +55,50 @@ def ok(msg):   pass  # Could collect passing checks if needed
 
 # ── Check 1: profiles_config.json references valid profile files ──────────────
 
+_ARCH_COMPAT = {
+    "arm": {"arm"},       # r2 uses asm.arch=arm for both ARM32 and AArch64
+    "aarch64": {"arm"},
+    "arm64": {"arm"},
+    "mips": {"mips"},
+    "mipsel": {"mips"},  # endianness is cfg.bigendian, not asm.arch
+    "x86": {"x86"},
+    "x86_64": {"x86"},
+    "ppc": {"ppc"},
+    "powerpc": {"ppc"},
+}
+
+
+def _profile_text_with_sources(profile_path: Path, seen=None) -> str:
+    """Return profile text plus same-corpus profiles sourced via `. /.../profiles/foo.r2`."""
+    if seen is None:
+        seen = set()
+    if profile_path in seen or not profile_path.exists():
+        return ""
+    seen.add(profile_path)
+    text = profile_path.read_text(errors="replace")
+    chunks = [text]
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line.startswith(". ") or line.startswith("#"):
+            continue
+        token = line[2:].split()[0]
+        marker = "/profiles/"
+        if marker in token:
+            rel = token.split(marker, 1)[1]
+            chunks.append(_profile_text_with_sources(PROFILES_DIR / rel, seen))
+    return "\n".join(chunks)
+
+
+def _forced_asm_arch(profile_path: Path) -> str | None:
+    for raw in _profile_text_with_sources(profile_path).splitlines():
+        line = raw.strip()
+        if line.startswith("#"):
+            continue
+        if line.startswith("e asm.arch="):
+            return line.split("=", 1)[1].split()[0].strip()
+    return None
+
+
 def check_profiles_config():
     if not PROFILES_CONFIG.exists():
         err(f"profiles_config.json missing: {PROFILES_CONFIG}")
@@ -67,8 +111,17 @@ def check_profiles_config():
             path = PROFILES_DIR / profile_file
             if not path.exists():
                 err(f"profiles_config.json [{section}] {key!r} → {profile_file!r}  ← FILE NOT FOUND")
-            else:
-                ok(f"  ✓ {section}/{key} → {profile_file}")
+                continue
+            ok(f"  ✓ {section}/{key} → {profile_file}")
+
+            expected_arch = key.split("/", 1)[0].lower()
+            forced_arch = _forced_asm_arch(path)
+            allowed = _ARCH_COMPAT.get(expected_arch)
+            if forced_arch and allowed and forced_arch not in allowed:
+                err(
+                    f"profiles_config.json [{section}] {key!r} → {profile_file!r} "
+                    f"forces asm.arch={forced_arch!r}, expected one of {sorted(allowed)!r}"
+                )
 
 
 # ── Check 2: coverage.json sanity ────────────────────────────────────────────
