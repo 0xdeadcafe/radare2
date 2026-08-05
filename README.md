@@ -1,4 +1,4 @@
-# r2 corpus — `skel/.local/share/radare2/`
+# r2 corpus — `~/.local/share/radare2/`
 
 Radare2 configuration, signatures, type definitions, and analysis profiles for
 firmware reverse engineering. Deployed to `~/.local/share/radare2/` by `skel/install.sh`.
