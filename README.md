@@ -1,7 +1,8 @@
 # r2 corpus — `~/.local/share/radare2/`
 
 Radare2 configuration, signatures, type definitions, and analysis profiles for
-firmware reverse engineering. Deployed to `~/.local/share/radare2/` by `skel/install.sh`.
+binary reverse engineering across firmware, desktop/server, mobile, and embedded
+targets. Deployed to `~/.local/share/radare2/` by `skel/install.sh`.
 
 ## Installation
 
@@ -17,7 +18,7 @@ bash skel/install.sh --copy
 
 ## Quick Start by Target
 
-### Linux (musl/uClibc firmware)
+### Linux (musl/uClibc binaries)
 ```r2
 r2 -i ~/.local/share/radare2/profiles/linux-musl-arm64.r2 binary
 aa; z/
@@ -26,6 +27,12 @@ aa; z/
 ### Windows PE
 ```r2
 r2 -i ~/.local/share/radare2/profiles/windows-x64.r2 target.exe
+aa; z/
+```
+
+### Android native library
+```r2
+r2 -i ~/.local/share/radare2/profiles/android-arm64.r2 libtarget.so
 aa; z/
 ```
 
@@ -51,9 +58,9 @@ r2 -i ~/.local/share/radare2/profiles/cobham-sailor-arm.r2 acu_ctl
 r2 -i ~/.local/share/radare2/profiles/intellian-arm-glibc.r2 nxagent.cgi
 ```
 
-### Firmware container identification
+### Container / format identification
 ```r2
-r2 -n firmware.bin
+r2 -n sample.bin
 /m ~/.local/share/radare2/magic/firmware.magic
 ```
 
@@ -65,28 +72,29 @@ r2 -n firmware.bin
 
 | File | Coverage |
 |------|---------|
-| `firmware.magic` | **Universal**: DJI, Rockchip, TRX, SEAMA, Netgear, D-Link, JBOOT, LZ4, SquashFS LZMA, Cisco/Icom/VxWorks/Juniper stubs |
+| `firmware.magic` | Composite container coverage: DJI, Rockchip, TRX, SEAMA, Netgear, D-Link, JBOOT, LZ4, SquashFS LZMA, Cisco/Icom/VxWorks/Juniper stubs |
 | `cisco_ios.magic` | Cisco IOS: monolithic ELF (MIPS/PPC), ZIP wrapper, IOS-XE, ROMMON, c1700 |
 | `cobham_bgan.magic` | Cobham SATCOM: TIIF, BGAN .dl, MAIN_CPU, eCos ARM |
-| `crypto_tables.magic` | Crypto tables: CRC-8/16/32, AES S-boxes, SHA-256/SHA-1, MD5, Blowfish, DES, ChaCha20, RC4 |
+| `crypto_tables.magic` | Crypto tables: CRC-8/16/32, AES S-boxes, SHA-256/SHA-1, MD5, Blowfish, DES, ChaCha20, RC4, SM4, Camellia, ARIA, Curve25519, Poly1305, HMAC |
 | `icom_firmware.magic` | Icom: IC-905 (AES), IC-705 (AES), IC-R8600 (LZSS), DU3, FIRM/AP-90M |
 | `juniper_junos.magic` | Juniper: 55AA block-compressed ISO, domestic package ELF, metatags |
-| `proto_fingerprint.magic` | Protocol handlers: HTTP, SNMP, MQTT, Modbus, SSH, SIP, RTSP, IKEv2, gRPC, SpaceX BwpProxy |
+| `proto_fingerprint.magic` | Protocol handlers: HTTP, SNMP, MQTT, Modbus, SSH, SIP, RTSP, IKEv2, gRPC, SpaceX BwpProxy, DNP3, IEC-60870, IEC-61850, BACnet, EtherCAT, PROFINET, OPC UA, Zigbee, Z-Wave, Matter, WebSocket, WireGuard, NETCONF, gNMI |
 | `silabs_gbl.magic` | Silicon Labs GBL: Gecko Bootloader, D-Link Z-Wave OTA, Realtek Ameba |
 | `starlink.magic` | SpaceX Starlink: sxverity container, gRPC APIs, UserClass enum, BwpProxy |
+| `uefi.magic` | UEFI: EFI PE32+ executables, Firmware Volumes (FV/FFS), capsule updates, NvRam variable store, Intel Flash Descriptor, ME firmware, ACPI tables, Secure Boot databases |
 | `vxworks.magic` | VxWorks: kernel ELF (x86-64/ARM/AArch64), DKM, ROMFS, .wrs_build_vars, v5/v6 banner |
 
 See `magic/README.md` for usage examples.
 
 ### Print Formats (`format/`)
 
-Structure definitions for parsing firmware headers with `pf`:
+Structure definitions for parsing binary/container headers with `pf`:
 
 | Format | Magic | Description |
 |--------|-------|-------------|
 | `pf.uimage_header` | 0x27051956 | U-Boot uImage (64 B, BE) |
 | `pf.trx_header` | "HDR0" | Broadcom TRX (28 B, LE) |
-| `pf.seama_header` | 0x5EA3A417 | SEAMA firmware |
+| `pf.seama_header` | 0x5EA3A417 | SEAMA image |
 | `pf.squashfs_super` | "hsqs"/"sqsh" | SquashFS v4 superblock |
 | `pf.ubi_ec_header` | "UBI#" | UBI erase counter (BE) |
 | `pf.jffs2_node` | 0x1985 | JFFS2 node header |
@@ -123,7 +131,7 @@ pf.dji_imah_header @ 0
 | `juniper/` | JunOS kmd 21.3R1.9 | x86-64 |
 | `musl/` | musl libc (Alpine generic) | aarch64, arm, armhf, i386, x86_64, mips32-be/le |
 | `openwrt/` | musl libc (OpenWrt ISA-specific) | mips_24kc, mipsel_24kc, mipsel_mips32, mips_mips32, mips64_octeonplus |
-| `uclibc/` | uClibc-ng (Bootlin toolchains) | mips32, mips64, mips64-n32 |
+| `uclibc/` | uClibc-ng (Bootlin toolchains) | mips32, mips64, mips64-n32, **arm32** (armv5-eabi, 3269 sigs) |
 | `vxworks/` | VxWorks 7 libraries: libc, libssl, libcrypto, libcurl, libz, sqlite3, libxml, cJSON, mosquitto | x86-64 |
 | `windows/` | VC++ runtime VS2008–VS2022: vcruntime, ucrtbase, msvcp, concrt, vcamp, vcomp, mfc, atl | x64, x86, arm64 |
 | `sessions/` | Per-binary corpus zsigs (12 confirmed binaries, 95–100% named) | mixed |
@@ -137,11 +145,12 @@ C headers loaded with `to <file>` then `aaft`:
 | Directory | Target | Key Types |
 |-----------|--------|-----------|
 | `libc/` | POSIX | `linux_errno`, `linux_signal`, `sockaddr_in`, `stat`, `dirent`, open/mmap flags |
+| `libc/fcntl-arm32.h` | ARM32 Linux | ARM32-correct `struct stat` (120 bytes), `struct dirent` |
 | `musl/` | musl libc | function signatures + zsig-name variants |
 | `vxworks/` | VxWorks 7 | `STATUS`, `SEM_ID`, `TASK_ID`, task/semaphore/socket APIs |
 | `android/` | Android | JNI, bionic, logcat, asset manager |
 | `cobham/` | Cobham SATCOM | `tt_cshell_cmd`, ACU message structs, libfdloop session |
-| `dji/` | DJI firmware | DUPC frames, FlyC params, IM\*H header, encrypt key blocks |
+| `dji/` | DJI platforms | DUPC frames, FlyC params, IM\*H header, encrypt key blocks |
 | `intellian/` | Intellian iARM | cJSON dispatch, UIF protocol, `bim_user_cfg`, escape_expand |
 | `juniper/` | Juniper SRX | `dvpn_sa_entry_t`, `dvpn_token_entry_t` |
 | `supermicro/` | Supermicro BMC | `tag_dispatch_entry`, IPMI session, `cgiGetPostVariable` |
@@ -150,7 +159,10 @@ C headers loaded with `to <file>` then `aaft`:
 | `openssl/` | OpenSSL | libssl, libcrypto function signatures and structs |
 | `ffmpeg/` | FFmpeg | libavcodec, libavformat, libavutil |
 | `zlib/` | zlib | `z_stream`, `gz_header`, compression constants |
-| `embedded/arm-none-eabi/` | Newlib Cortex-M | *Headers pending regeneration — use zsigs* |
+| `mbedtls/` | Mbed TLS | `mbedtls_ssl_context/config`, AES/SHA/MD5/PK contexts, cipher/hash enums |
+| `lua/` | Lua 5.x | Full C API (`lua_State`, `lua_pcall`, `luaL_*`), `lua_Debug`, type/status enums |
+| `freebsd/` | FreeBSD | `kevent`, kqueue, Capsicum (`cap_enter`), jail, BSD `struct stat` |
+| `embedded/arm-none-eabi/` | Cortex-M | NVIC, SCB, SysTick, MPU, DWT, CoreDebug, FPU registers; CMSIS API |
 
 See `types/README.md` for usage examples and enum lookup.
 
@@ -165,15 +177,19 @@ Key profiles:
 | `windows-x64.r2` / `windows-x86.r2` / `windows-arm64.r2` | Windows PE |
 | `android-arm64.r2` / `android-arm32.r2` | Android native |
 | `linux-musl-arm64.r2` / `linux-musl-x64.r2` | Linux musl |
+| `linux-glibc-x64.r2` / `linux-glibc-arm64.r2` | Linux glibc (Debian/Ubuntu/RHEL, server, CTF) |
+| `linux-glibc-arm32.r2` | Linux glibc ARM32 |
 | `openwrt-mips_24kc.r2` (+ 4 variants) | OpenWrt routers |
 | `cisco-ios-mips32.r2` / `cisco-ios-ppc32.r2` | Cisco IOS |
-| `dji-flyc.r2` / `dji-amba-sys.r2` / `dji-wifi.r2` | DJI firmware |
+| `dji-flyc.r2` / `dji-amba-sys.r2` / `dji-wifi.r2` | DJI targets |
 | `vxworks7-x86_64.r2` | VxWorks 7 |
 | `cobham-sailor-arm.r2` | Cobham SATCOM |
 | `intellian-arm-glibc.r2` | Intellian VSAT |
 | `supermicro-bmc-arm.r2` | Supermicro BMC |
-| `juniper-srx.r2` | Juniper SRX |
+| `juniper-srx.r2` / `juniper-ppc32.r2` | Juniper SRX |
 | `spacex-starlink-musl-arm64.r2` | SpaceX Starlink |
+| `freebsd-x64.r2` | FreeBSD x86-64 (JunOS userland, pfSense, TrueNAS) |
+| `macos-x64.r2` / `macos-arm64.r2` | macOS Intel / Apple Silicon |
 
 ### Address-Based Symbols (`symbols/`)
 
@@ -207,7 +223,8 @@ Named by vendor/product/version. Used when zsig matching fails on stripped binar
 | `generate-musl-zsig.py` | Generate zsigs from musl libc source |
 | `generate-openwrt-musl-zsig.py` | Generate zsigs from OpenWrt toolchain tarballs |
 | `generate-ndk-zsig.py` | Generate zsigs from Android NDK |
-| `generate-uclibc-mipsbe-zsig.py` | Generate zsigs from uClibc Bootlin toolchain |
+| `generate-uclibc-mipsbe-zsig.py` | Generate zsigs from uClibc Bootlin toolchain (MIPS BE) |
+| `generate-uclibc-arm32-zsig.py` | Generate zsigs from uClibc Bootlin toolchain (ARM32) |
 | `generate-vcruntime-zsig.py` | Generate zsigs from VC++ runtime DLLs |
 | `generate-winsdk-zsig.py` | Generate zsigs from Windows SDK static libs |
 | `generate-vxworks-zsig.py` | Generate zsigs from VxWorks SDK libraries |
@@ -229,7 +246,7 @@ Named by vendor/product/version. Used when zsig matching fails on stripped binar
 
 | File | Content |
 |------|---------|
-| `dji-firmware-formats.md` | DJI firmware container structure (xV4, IM\*H, Ambarella) |
+| `dji-firmware-formats.md` | DJI xV4, IM\*H, and Ambarella container structures |
 | `dji-module-types.md` | DJI module type reference (target IDs, product codes) |
 | `modality-firmware-workflows.md` | Modality (angr/Z3) symbolic execution workflows |
 | `protocols/dji-dupc-0x55.md` | DJI DUPC 0x55 protocol specification |
@@ -238,9 +255,9 @@ Named by vendor/product/version. Used when zsig matching fails on stripped binar
 
 ## Common Workflows
 
-### Firmware Container Identification
+### Container / Format Identification
 ```r2
-r2 -n firmware.bin
+r2 -n sample.bin
 /m ~/.local/share/radare2/magic/firmware.magic
 /m ~/.local/share/radare2/magic/vxworks.magic
 ```
@@ -287,7 +304,7 @@ pf.uimage_header
 
 ```
 ~/.local/share/radare2/  (symlinks → /opt/aether/skel/.local/share/radare2/)
-├── magic/           firmware format + crypto + protocol magic signatures
+├── magic/           file/container format + crypto + protocol magic signatures
 ├── format/          pf print-format definitions (pf.uimage_header etc.)
 ├── types/           C headers: to <file> → aaft applies to imports
 ├── zigns/           function signatures: zo <file> → z/ to match
@@ -297,11 +314,12 @@ pf.uimage_header
 │   └── libc/        libc sub-profiles (musl, glibc, bionic, uclibc)
 ├── symbols/         address-based .r2 scripts per vendor/binary
 ├── scripts/         r2 automation scripts sourced by profiles
-│   ├── windows-sinks.r2          sink labeler for Windows PE
+│   ├── windows-sinks.r2          sink labeler for Windows PE (CMD_INJECTION, BUFFER_OVERFLOW, etc.)
 │   ├── windows-sinks-stripped.r2 comment-stripped version (for embedding)
-│   └── load-windows-sinks.r2     convenience wrapper
+│   ├── load-windows-sinks.r2     convenience wrapper
+│   └── elf-sinks.r2              sink labeler for ELF binaries (system, gets, recv, etc.)
 ├── tool/            zsig + symbol generation scripts
-├── docs/            protocol docs and firmware format specs
+├── docs/            protocol docs, format specs, and workflow references
 ├── coverage.json    arch/vendor coverage matrix (profile+symbols+zsig status)
 └── modality/        Modality (angr/Z3) symbolic execution bridge
 ```
@@ -313,5 +331,5 @@ pf.uimage_header
 See [CONSTITUTION.md](CONSTITUTION.md):
 - **Enhance r2** — don't wrap or replace r2 commands
 - **Unix philosophy** — small tools that compose well
-- **Firmware focus** — only what firmware RE needs
+- **Broad applicability** — reusable RE data; target-specific only when it adds value
 - **Simplicity** — if r2 already does it, don't duplicate

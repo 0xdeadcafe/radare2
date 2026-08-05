@@ -55,14 +55,13 @@ These target STM32 Cortex-M bare-metal firmware — no OS, no networking stack.
 The `sockaddr_in` struct in `libc/socket.h` is x86_64 layout; loading it for ARM/32M
 creates wrong-sized struct annotations. Removed `to libc/socket.h` from all three.
 
-### P1-4 `libc/fcntl.h` `struct stat` is x86_64 only — loaded by ARM32 profiles
-`libc/fcntl.h` documents this: *"struct stat varies significantly by architecture"*
-but 7 ARM32 profiles still load it (cobham-sailor-arm, furuno-felcom-arm, bosch-cpp3,
-bosch-cppenc, hpe-ilo7-arm64*, etc.). For ARM32 targets `st_ino` is 32 bits not 64,
-`st_size` offsets differ. This gives wrong field annotations.
-**TODO**: Create `libc/fcntl-arm32.h` with ARM32-correct `struct stat` and update
-ARM32 profiles to load it. ARM64 and x86_64 can keep the current file.
-*hpe-ilo7 is ARM64 so that one is correct.*
+### P1-4 `libc/fcntl.h` `struct stat` is x86_64 only — loaded by ARM32 profiles ✅ FIXED
+Created `types/libc/fcntl-arm32.h` with correct ARM32 `struct stat` (120 bytes,
+64-bit dev/rdev/ino/size via `long long`, 32-bit times via `int`). Updated 10 ARM32
+profiles to load `fcntl-arm32.h` instead of `fcntl.h`:
+`linux-glibc-arm32.r2`, `libc/glibc-arm32.r2`, `intellian-arm-glibc.r2`,
+`cobham-sailor-arm.r2`, `furuno-felcom-arm.r2`, `bosch-cpp3.r2`, `bosch-cppenc.r2`,
+`supermicro-bmc-arm.r2`, `netgear-orbi-cgi.r2`, `dji-android-arm32.r2`.
 
 ### P1-5 Duplicate session zsigs from same source binary
 Two pairs each come from the same binary but capture different analysis stages:
@@ -71,11 +70,9 @@ Two pairs each come from the same binary but capture different analysis stages:
 The smaller sessions are subsets. Loading both wastes time and risks false-positive
 double-renames. **TODO**: Merge each pair via `rasign2 -m`; keep only the merged zsig.
 
-### P1-6 Session `8073dc82fc3f4caa` has `source_binary: "Auth"` (filename, not hash)
-4191-entry Supermicro BMC session. `source_binary` field stores the binary filename
-instead of the binary hash. `prune-session-zsigs.py` and coverage tools can't
-cross-reference to vault entries. **TODO**: Update index.json with correct hash
-(`193a2ccb...` is the library entry for Supermicro BMC).
+### P1-6 Session `8073dc82fc3f4caa` has `source_binary: "Auth"` (filename, not hash) ✅ FIXED
+4191-entry Supermicro BMC session. Updated `index.json` `source_binary` field to
+`193a2ccb7fa04c77` (the correct library hash from coverage.json).
 
 ---
 
@@ -119,12 +116,11 @@ was never written by `corpus_commit.py`. The quality gate silently passed.
 Validator now computes `named_pct` from zsig file if the field is absent and
 emits a warning to add it to the index.
 
-### P3-3 `validate-corpus.py` doesn't flag dead `types/` headers
+### P3-3 `validate-corpus.py` doesn't flag dead `types/` headers ✅ FIXED
 Headers that exist but no profile loads (`ffmpeg/avcodec.h`, `windows/ntstatus.h`,
 `windows/winerror.h`) were invisible to the validator. Fixed by P2-1/P2-2 (now
-all are loaded), but the validator should also emit a warning for any `.h` file
-in `types/` not referenced by any profile.
-**TODO**: Add `check_dead_types()` function to validate-corpus.py.
+all are loaded). `check_dead_types()` added to validate-corpus.py — warns for
+any `.h` file in `types/` not referenced by any profile.
 
 ---
 
@@ -150,12 +146,17 @@ consolidating into a single "Coverage complete" note. Low priority.
 
 These are missing zsigs/profiles for targets we actively analyse:
 
-| Gap | Arch | Priority | Blocker |
-|-----|------|----------|---------|
-| `uclibc/arm32/uclibc-libc.zsig` | ARM32 | HIGH | Supermicro BMC uClibc; needs rootfs extraction first |
-| `libc/fcntl-arm32.h` (P1-4) | ARM32 | MEDIUM | Architecture-correct stat struct |
-| Session pair merges (P1-5) | mixed | LOW | Needs rasign2 merge support |
-| glibc/arm64 for Navico/Raymarine | ARM32/64 | LOW | Target triage first |
+| Gap | Arch | Priority | Status |
+|-----|------|----------|--------|
+| `uclibc/arm32/uclibc-libc.zsig` | ARM32 | HIGH | ✅ DONE — Bootlin armv5-eabi 2024.02, 3269 sigs, 76% named |
+| `libc/fcntl-arm32.h` (P1-4) | ARM32 | MEDIUM | ✅ DONE — created, 10 ARM32 profiles updated |
+| `linux-glibc-x64.r2` top-level profile | x86-64 | MEDIUM | ✅ DONE |
+| `linux-glibc-arm64.r2` top-level profile | arm64 | MEDIUM | ✅ DONE |
+| `freebsd-x64.r2` profile | x86-64 | MEDIUM | ✅ DONE |
+| `macos-x64.r2` / `macos-arm64.r2` profiles | x86-64/arm64 | MEDIUM | ✅ DONE (zsigs TODO) |
+| Session pair merges (P1-5) | mixed | LOW | OPEN — needs rasign2 merge support |
+| glibc/arm64 for Navico/Raymarine | ARM32/64 | LOW | OPEN — target triage first |
+| macOS zsigs (x64 + arm64) | x86-64/arm64 | LOW | OPEN — needs macOS SDK or Apple host |
 
 ---
 

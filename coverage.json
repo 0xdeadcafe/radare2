@@ -15,12 +15,26 @@
     "vendor": "dell",
     "zsigs": true
   },
+  "aarch64-glibc-generic": {
+    "arch": "aarch64",
+    "note": "linux-glibc-arm64.r2; debian/arm64 zsigs (13 libs); full POSIX + OpenSSL + FFmpeg types",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
   "aarch64-hpe": {
     "arch": "aarch64",
     "note": "hpe-ilo7-arm64.r2 created; no zsigs yet (binary not fully analysed)",
     "profile": true,
     "symbols": false,
     "vendor": "hpe",
+    "zsigs": false
+  },
+  "aarch64-macos": {
+    "arch": "aarch64",
+    "note": "macos-arm64.r2; Apple Silicon Mach-O; PAC-aware; TODO: native macOS zsigs",
+    "profile": true,
+    "vendor": "generic",
     "zsigs": false
   },
   "aarch64-spacex": {
@@ -110,6 +124,7 @@
   },
   "arm-supermicro": {
     "arch": "ARM 32-bit (ARM926EJ-S)",
+    "note": "supermicro-bmc-arm.r2; uclibc/arm32/uclibc-libc.zsig (3269 sigs); bmc_structs.h; ARMv5TE ARM926EJ-S",
     "profile": true,
     "symbols": false,
     "vendor": "supermicro",
@@ -144,6 +159,14 @@
     "profile": true,
     "symbols": true,
     "vendor": "dji",
+    "zsigs": true
+  },
+  "arm32-uclibc-generic": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "profiles/libc/uclibc-arm32.r2 + zigns/uclibc/arm32/uclibc-libc.zsig (Bootlin armv5-eabi 2024.02); 3269 sigs, 76% named",
+    "profile": true,
+    "symbols": false,
+    "vendor": "generic",
     "zsigs": true
   },
   "mips-cisco": {
@@ -191,6 +214,20 @@
     "vendor": "cisco",
     "zsigs": true
   },
+  "x64-freebsd": {
+    "arch": "x86-64",
+    "note": "freebsd-x64.r2; BSD types (kqueue, Capsicum, jail); debian/amd64 zsigs for partial coverage",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "x64-glibc-generic": {
+    "arch": "x86-64",
+    "note": "linux-glibc-x64.r2; debian/amd64 zsigs (13 libs); full POSIX + OpenSSL + FFmpeg types",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
   "x64-juniper": {
     "arch": "x86-64",
     "note": "juniper-srx.r2 covers both MIPS64 and x86-64 binaries",
@@ -198,6 +235,13 @@
     "symbols": true,
     "vendor": "juniper",
     "zsigs": true
+  },
+  "x64-macos": {
+    "arch": "x86-64",
+    "note": "macos-x64.r2; Mach-O; POSIX + BSD types; TODO: native macOS zsigs",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": false
   },
   "x86-glibc-x64": {
     "arch": "x86-64",

@@ -51,6 +51,8 @@ zo openwrt/mips_24kc/musl-libc.zsig
 e dir.types=~/.local/share/radare2/types
 to musl/functions.h
 to musl/functions-zsig.h
+to mbedtls/mbedtls.h
+to lua/lua.h
 
 # =============================================================================
 # Display

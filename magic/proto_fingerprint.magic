@@ -175,3 +175,142 @@
 
 # Unlock service (uterm_binbox_user_terminal)
 0	string		/root/.ssh/authorized_keys	SpaceX unlock_service SSH key write target
+
+# =============================================================================
+# DNP3 (Distributed Network Protocol 3 — SCADA/ICS power grid, water systems)
+# =============================================================================
+0	string	dnp3	DNP3 protocol handler (lowercase)
+0	string	DNP3	DNP3 protocol handler (uppercase)
+# DNP3 start bytes: 0x0564 (big-endian sync word)
+0	beshort	0x0564	DNP3 frame start bytes (0x0564 sync word)
+
+# =============================================================================
+# IEC 60870-5-104 (IEC-104 — power grid telecontrol over TCP/IP)
+# =============================================================================
+0	string	iec104	IEC 60870-5-104 SCADA protocol handler
+0	string	IEC104	IEC 60870-5-104 SCADA protocol handler (uppercase)
+# IEC-104 APCI start byte is always 0x68 followed by length
+0	byte	0x68	IEC 60870-5 APCI start byte (0x68)
+
+# =============================================================================
+# IEC 61850 (power substation automation — MMS, GOOSE, SV)
+# =============================================================================
+0	string	iec61850	IEC 61850 substation automation protocol
+0	string	IEC61850	IEC 61850 protocol (uppercase)
+0	string	GOOSE	IEC 61850 GOOSE (Generic Object-Oriented Substation Event)
+0	string	MMS_	IEC 61850 MMS (Manufacturing Message Specification) prefix
+0	string	libiec61850	libiec61850 open-source IEC 61850 library
+
+# =============================================================================
+# Modbus RTU / TCP (industrial, PLC communication)
+# Already has string matches above; add byte-level TCP ADU detection
+# =============================================================================
+# Modbus TCP: transaction ID (2B) + protocol ID 0x0000 (2B) + length (2B) + unit ID (1B)
+2	beshort	0x0000	Modbus TCP ADU (protocol identifier = 0x0000)
+
+# =============================================================================
+# BACnet (Building Automation and Control networks — HVAC, lighting, access control)
+# =============================================================================
+0	string	BACnet	BACnet protocol string
+0	string	bacnet	BACnet protocol (lowercase)
+0	string	bacpypes	BACpypes Python BACnet library
+# BACnet/IP (BVLC) type byte: 0x81 followed by function code
+0	byte	0x81	BACnet/IP BVLC header (0x81)
+# BACnet NPDU network layer: version 1 = 0x01
+0	byte	0x01	BACnet NPDU version byte
+
+# =============================================================================
+# EtherCAT (Ethernet-based real-time fieldbus — industrial motion control)
+# =============================================================================
+0	string	EtherCAT	EtherCAT fieldbus protocol string
+0	string	ethercat	EtherCAT protocol (lowercase)
+0	string	ec_master	EtherCAT master reference (IgH EtherCAT Master)
+0	string	soem	Simple Open EtherCAT Master (SOEM) library
+
+# =============================================================================
+# PROFINET (Siemens industrial Ethernet protocol)
+# =============================================================================
+0	string	PROFINET	PROFINET protocol string
+0	string	profinet	PROFINET protocol (lowercase)
+0	string	pn_io	PROFINET I/O reference
+# PROFINET RT EtherType: 0x8892
+# (byte-level match only meaningful in Ethernet frame context)
+
+# =============================================================================
+# OPC UA (Open Platform Communications Unified Architecture — ICS/SCADA)
+# =============================================================================
+0	string	opcua	OPC UA protocol handler (lowercase)
+0	string	OPC UA	OPC UA protocol string
+0	string	open62541	open62541 OPC UA C library
+0	string	opc.tcp://	OPC UA TCP endpoint URL scheme
+# OPC UA Binary protocol: Hello message starts with "HEL"
+0	string	HEL\x46	OPC UA HEL (Hello) binary message
+0	string	OPN\x46	OPC UA OPN (OpenSecureChannel) binary message
+0	string	MSG\x46	OPC UA MSG (service request/response) binary message
+
+# =============================================================================
+# Zigbee / IEEE 802.15.4 (IoT, smart home, building automation)
+# =============================================================================
+0	string	ZigBee	ZigBee wireless protocol string
+0	string	zigbee	ZigBee protocol (lowercase)
+0	string	zboss	ZBOSS ZigBee stack
+0	string	z-stack	Texas Instruments Z-Stack ZigBee
+0	string	zigpc	ZigBee Platform Controller
+
+# =============================================================================
+# Z-Wave (smart home mesh network — door locks, sensors)
+# =============================================================================
+0	string	zwave	Z-Wave protocol handler (lowercase)
+0	string	Z-Wave	Z-Wave protocol string
+0	string	zwaveip	Z/IP (Z-Wave over IP) protocol
+
+# =============================================================================
+# Thread / Matter (Apple/Google smart home — IoT)
+# =============================================================================
+0	string	openthread	OpenThread (Thread networking stack)
+0	string	matter-controller	Matter home automation controller
+0	string	chip-tool	CHIP/Matter development tool
+
+# =============================================================================
+# AMQP (Advanced Message Queuing Protocol — IoT messaging)
+# =============================================================================
+# AMQP frame header starts with "AMQP" for protocol header
+0	string	AMQP	AMQP protocol header / connection frame
+# RabbitMQ AMQP client
+0	string	rabbitmq	RabbitMQ AMQP broker/client
+
+# =============================================================================
+# WebSocket (upgrades from HTTP — increasingly common in embedded web UIs)
+# =============================================================================
+0	string	Upgrade: websocket	HTTP WebSocket upgrade request
+0	string	Sec-WebSocket-Key:	WebSocket handshake key header
+0	string	258EAFA5-E914-47DA-95CA-C5AB0DC85B11	WebSocket GUID (RFC 6455 magic UUID)
+
+# =============================================================================
+# XMPP (Jabber — IoT device messaging, some SATCOM terminals)
+# =============================================================================
+0	string	jabber:client	XMPP/Jabber client stream namespace
+0	string	jabber:iq:	XMPP IQ stanza namespace prefix
+
+# =============================================================================
+# WireGuard (modern VPN — increasingly in embedded routers)
+# =============================================================================
+0	string	wireguard	WireGuard VPN string
+0	string	WireGuard	WireGuard VPN (titlecase)
+# WireGuard handshake init: type=1 (LE 4-byte) followed by reserved 3 bytes
+0	lelong	0x00000001	WireGuard handshake initiation (type=1, check for WG context)
+
+# =============================================================================
+# NETCONF / YANG (network device management — IETF RFC 6241)
+# =============================================================================
+0	string	netconf	NETCONF network configuration protocol
+0	string	urn:ietf:params:xml:ns:netconf	NETCONF XML namespace
+0	string	urn:ietf:params:netconf	NETCONF capability URN prefix
+
+# =============================================================================
+# gNMI (gRPC Network Management Interface — modern YANG/gRPC telemetry)
+# =============================================================================
+0	string	gnmi.gNMI	gNMI gRPC service definition
+0	string	gnmi.GetRequest	gNMI Get RPC
+0	string	gnmi.SetRequest	gNMI Set RPC (configuration write)
+0	string	gnmi.SubscribeRequest	gNMI Subscribe (streaming telemetry)

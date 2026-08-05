@@ -31,6 +31,7 @@ e zign.minsz=4
 e dir.types=~/.local/share/radare2/types
 to musl/functions.h
 to musl/functions-zsig.h
+to mbedtls/mbedtls.h
 
 # Load musl libc signatures (zo uses dir.zigns as base; ~ is expanded by r2)
 zo musl/aarch64/musl-libc.zsig

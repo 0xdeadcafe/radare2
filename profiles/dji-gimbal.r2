@@ -55,6 +55,7 @@ e zign.minsz=4
 # Type definitions (newlib bare-metal — no POSIX socket layer on STM32)
 e dir.types=~/.local/share/radare2/types
 to libc/functions.h
+to embedded/arm-none-eabi/cortex-m.h
 
 # Visual settings for firmware analysis
 e asm.describe=true

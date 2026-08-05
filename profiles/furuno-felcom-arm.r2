@@ -55,7 +55,7 @@ e asm.cmt.col=60
 e dir.types=~/.local/share/radare2/types
 to libc/functions.h
 to libc/socket.h
-to libc/fcntl.h
+to libc/fcntl-arm32.h
 to libc/errno.h
 to libc/signal.h
 

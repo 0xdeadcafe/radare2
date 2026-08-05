@@ -47,7 +47,7 @@ e asm.cmt.col=60
 e dir.types=~/.local/share/radare2/types
 to libc/functions.h
 to libc/socket.h
-to libc/fcntl.h
+to libc/fcntl-arm32.h
 to libc/errno.h
 to libc/signal.h
 
@@ -55,6 +55,11 @@ to libc/signal.h
 # IPMI session, libweb session IP bypass, cgiGetPostVariable)
 # Path after install.sh: ~/.local/share/radare2/types/supermicro/
 to supermicro/bmc_structs.h
+
+# ── Zignatures ──────────────────────────────────────────────────────────────
+# uClibc-ng ARM32 (Bootlin armv5-eabi 2024.02 — ARM926EJ-S compatible)
+# 3269 sigs, 76% named: libc, libm, libpthread, librt
+zo uclibc/arm32/uclibc-libc.zsig
 
 # ── Magic scans ───────────────────────────────────────────────────────────────
 /m /root/.local/share/radare2/magic/crypto_tables.magic

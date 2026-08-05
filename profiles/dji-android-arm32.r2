@@ -38,7 +38,7 @@ to android/functions.h
 to libc/functions.h
 to libc/socket.h
 to libc/errno.h
-to libc/fcntl.h
+to libc/fcntl-arm32.h
 to libc/signal.h
 
 # ── DJI DUML / DUPC type definitions ─────────────────────────────────────────

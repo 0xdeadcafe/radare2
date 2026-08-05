@@ -56,7 +56,7 @@ e dir.types=~/.local/share/radare2/types
 to musl/functions.h
 to musl/functions-zsig.h
 to libc/socket.h
-to libc/fcntl.h
+to libc/fcntl-arm32.h
 to libc/errno.h
 
 # =============================================================================

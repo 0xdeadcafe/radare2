@@ -13,12 +13,12 @@ There are no other copies maintained in parallel.
 
 | What lives here | What does NOT live here |
 |---|---|
-| types, profiles, magic, format, symbols | Vault findings, PoCs, firmware recon |
+| types, profiles, magic, format, symbols | Vault findings, PoCs, target recon |
 | radare2rc defaults | Per-target analysis artefacts |
 | tool/ generators | Binary blobs, core dumps |
 | zigns/ (corpus + session zsigs, committed to git) | Duplicate copies anywhere |
 
-**Vault** (`vault/`) holds firmware-specific knowledge (Findings, Targets, Patterns, PoCs).
+**Vault** (`vault/`) holds target-specific knowledge (Findings, Targets, Patterns, PoCs).
 It never holds copies of r2 configuration — those live here only.
 
 **Write-back:** when a skill session discovers new named functions, struct types, or
@@ -31,7 +31,7 @@ immediately — no manual rsync needed.
 `~/.local/share/radare2/zigns/` where r2 can load them via `dir.zigns`.
 The `zigns/` directory here contains only a `.gitkeep` placeholder so the Docker
 bind mount path always exists. Running without external zigns is gracefully degraded
-(vault-generated zigs still work).
+(session-generated zigs still work).
 
 ## Principles
 
@@ -45,19 +45,19 @@ bind mount path always exists. Running without external zigns is gracefully degr
 - Scripts should be obvious and minimal
 - When in doubt, leave it out
 
-### 3. Firmware Focus
-- Signatures for embedded/IoT firmware formats
-- Zignatures for statically-linked libraries (musl, NDK, uclibc)
-- Vendor-specific formats r2 doesn't know
+### 3. Reusable RE Corpus
+- Prefer reusable signatures for libraries, runtimes, ABIs, protocols, and containers
+- Target/vendor-specific data is welcome when confirmed and useful beyond one ephemeral session
+- Firmware is a first-class use case, not the boundary of the corpus
 
 ## What Belongs Here
 
 | Directory | Purpose | Examples |
 |-----------|---------|----------|
 | `zigns/` | Library function signatures | libc, musl, Android NDK, Windows SDK |
-| `magic/` | File format signatures | Firmware headers r2 lacks |
-| `format/` | Structure definitions | `pf` templates for firmware |
-| `types/` | Type definitions | C headers for firmware structures |
+| `magic/` | File format signatures | Headers and file/container markers r2 lacks |
+| `format/` | Structure definitions | `pf` templates for binary/container structures |
+| `types/` | Type definitions | C headers for ABI, library, platform, and target structures |
 | `tool/` | Content generators | Scripts that produce the above |
 | `radare2rc` | Sensible defaults | Display/analysis settings |
 
@@ -72,7 +72,7 @@ bind mount path always exists. Running without external zigns is gracefully degr
 ## Decision Process
 
 1. Does r2 already do this? → **Don't add**
-2. Is it a file signature? → `magic/`
+2. Is it a file/container signature? → `magic/`
 3. Is it a library signature? → `zigns/`
 4. Is it a structure? → `format/` or `types/`
 5. Does it generate any of the above? → `tool/`
