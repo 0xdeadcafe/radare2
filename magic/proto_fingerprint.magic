@@ -1,0 +1,177 @@
+# proto_fingerprint.magic — Protocol handler identification in firmware binaries
+#
+# Identifies which network protocols a binary implements by scanning for
+# characteristic string constants and byte sequences that protocol handlers
+# embed in their code/data sections.
+#
+# Use from r2: /m ~/.local/share/radare2/magic/proto_fingerprint.magic
+# Or from a profile: /m magic/proto_fingerprint.magic
+#
+# Install: cp proto_fingerprint.magic ~/.local/share/radare2/magic/
+#
+# When a hit is found, the offset points to the string/constant in the binary.
+# Cross-reference it (axt @ <offset>) to find the handling function.
+
+# =============================================================================
+# DJI DUPC 0x55 Protocol
+# Wi-Fi modules: P3C/P3S/P3_4K m0700, m2700
+# Reference: skel/.local/share/radare2/docs/protocols/dji-dupc-0x55.md
+# =============================================================================
+0	string	process_packet	DJI DUPC protocol handler (process_packet)
+0	string	dji_printf	DJI firmware logging (dji_printf)
+0	string	cmd_set	DJI DUPC command set field
+0	string	DUPC	DJI DUPC protocol string
+# DJI DUPC magic + length header: 0x55 <len_lo> <len_hi:6|ver:2>
+0	string	\x55\x0f\x04	DJI DUPC 0x55 packet header (magic=0x55)
+
+# =============================================================================
+# HTTP
+# =============================================================================
+0	string	HTTP/1.	HTTP/1.x response handler
+0	string	HTTP/2	HTTP/2 response handler
+0	string	Content-Type:	HTTP Content-Type header handler
+0	string	Authorization:	HTTP Authorization header handler
+0	string	WWW-Authenticate:	HTTP WWW-Authenticate handler (auth challenge)
+0	string	application/json	HTTP JSON API handler
+0	string	text/html	HTTP HTML content handler
+
+# =============================================================================
+# SNMP
+# =============================================================================
+0	string	snmpd	SNMP daemon binary
+0	string	NET-SNMP	Net-SNMP library
+0	string	1.3.6.1	SNMP OID prefix (MIB II)
+0	string	snmpTrap	SNMP trap handler
+
+# =============================================================================
+# MQTT
+# =============================================================================
+0	string	mqtt	MQTT protocol handler (lowercase)
+0	string	MQTT	MQTT protocol identifier (uppercase)
+0	string	MQIsdp	MQTT v3.1 protocol identifier
+
+# =============================================================================
+# Modbus
+# =============================================================================
+0	string	modbus	Modbus protocol handler (lowercase)
+0	string	Modbus	Modbus protocol handler (titlecase)
+0	string	MODBUS	Modbus protocol handler (uppercase)
+
+# =============================================================================
+# Telnet
+# =============================================================================
+0	string	telnetd	Telnet daemon
+0	string	utelnetd	Micro-telnetd daemon (OpenWrt)
+# IAC (Interpret As Command) byte sequence
+0	string	\xff\xfd	Telnet IAC DO option negotiation
+0	string	\xff\xfb	Telnet IAC WILL option negotiation
+
+# =============================================================================
+# FTP
+# =============================================================================
+0	string	vsftpd	vsftpd FTP server
+0	string	proftpd	ProFTPD server
+# FTP service banner
+0	string	220 FTP	FTP server 220 greeting
+0	string	230 Login	FTP login success response
+
+# =============================================================================
+# SSH / Dropbear
+# =============================================================================
+0	string	SSH-2.0-	SSH-2.0 version string
+0	string	SSH-1.99	SSH backward-compatible version string
+0	string	dropbear	Dropbear SSH daemon/client
+
+# =============================================================================
+# CoAP (Constrained Application Protocol — IoT/embedded)
+# =============================================================================
+0	string	coap://	CoAP URI scheme
+0	string	coap+tcp	CoAP over TCP URI scheme
+
+# =============================================================================
+# LwM2M / OMA DM (device management — IoT firmware)
+# =============================================================================
+0	string	lwm2m	LwM2M device management
+0	string	oma-dm	OMA Device Management
+
+# =============================================================================
+# TR-069 (CWMP — CPE WAN Management Protocol, routers/gateways)
+# =============================================================================
+0	string	cwmp:	TR-069 CWMP namespace
+0	string	urn:dslforum-org	DSLForum TR-069 URN
+
+# =============================================================================
+# UPnP / SSDP (router firmware, media devices)
+# =============================================================================
+0	string	M-SEARCH * HTTP	UPnP SSDP M-SEARCH discovery
+0	string	SSDP/1.1	SSDP protocol version
+0	string	urn:schemas-upnp-org	UPnP device schema URN
+0	string	UPnP/1.	UPnP version string
+
+# =============================================================================
+# SIP (VoIP — commonly found in BGAN terminals, enterprise routers)
+# =============================================================================
+0	string	INVITE sip:	SIP INVITE method
+0	string	SIP/2.0	SIP/2.0 response line
+0	string	Via: SIP	SIP Via header
+0	string	asterisk	Asterisk SIP PBX
+
+# =============================================================================
+# RTSP (streaming — cameras, drone video links)
+# =============================================================================
+0	string	RTSP/1.0	RTSP/1.0 response
+0	string	rtsp://	RTSP URI scheme
+
+# =============================================================================
+# IKEv2 / IPsec (VPN firmware — firewalls, BGAN terminals)
+# =============================================================================
+0	string	ISAKMP	IKEv2/ISAKMP handler
+0	string	IKE_SA_INIT	IKEv2 SA_INIT exchange type
+0	string	ikev2	IKEv2 implementation string
+0	string	racoon	Racoon IKE daemon
+0	string	strongswan	strongSwan IPsec
+
+# =============================================================================
+# RADIUS (authentication — common in enterprise/satellite terminals)
+# =============================================================================
+0	string	radiusd	RADIUS daemon
+0	string	RADIUS	RADIUS protocol string
+
+# =============================================================================
+# Diameter (AAA — successor to RADIUS, found in LTE/satellite systems)
+# =============================================================================
+0	string	Diameter	Diameter protocol handler
+0	string	diameter	Diameter protocol (lowercase)
+
+# =============================================================================
+# SpaceX Starlink gRPC / BwpProxy protocol fingerprints
+#
+# Source: 2026-05-10 catson/catapult firmware analysis
+# Findings: STARLINK-FRONTEND-GRPC-AUTH-TAXONOMY-2026, AUTH_BYPASS_fd54cbdb
+# =============================================================================
+
+# SpaceX.API.Device gRPC service namespace
+0	string		SpaceX.API.Device	SpaceX Starlink device gRPC API (SpaceX.API.Device.*)
+0	string		SpaceX.API.Device.Services.Unlock	SpaceX UnlockService gRPC (root SSH key injection)
+
+# Go protobuf package paths (embedded in static Go binaries)
+0	string		spacex.com/sx_command	SpaceX SensitiveCommand gRPC package (Go)
+0	string		spacex.com/security/catapult_provisioning	SpaceX Catapult provisioning gRPC (Go)
+
+# gRPC auth metric channel names (unique to user_terminal_frontend)
+0	string		frontend.grpc_auth.	SpaceX Starlink gRPC auth telemetry handler
+0	string		grpc_god_user_on_prod_ut	SpaceX god-user alert metric (user_mmut.project.so)
+0	string		grpc_dev_key_on_prod_ut	SpaceX dev-key alert metric (user_mmut.project.so)
+
+# Slate key-value store protocol (emc_web_socket_server)
+0	string		emc.test_device		SpaceX Slate production gate key (emc_web_socket_server :8065)
+0	string		websocket.get_slate	SpaceX emc WebSocket slate-read protocol handler
+
+# BwpProxy satellite command bus (emc_web_socket_server + uterm_binbox)
+0	string		proxy_send_command_arm		SpaceX BwpProxy satellite ARM command handler
+0	string		proxy_send_command_disarm_all	SpaceX BwpProxy satellite DISARM ALL handler
+0	string		proxy_gnc_pause			SpaceX BwpProxy GNC pause command handler
+0	string		bwp_proxy_gnc_iss_ecef_state_upload	SpaceX BwpProxy ECEF position injection handler
+
+# Unlock service (uterm_binbox_user_terminal)
+0	string		/root/.ssh/authorized_keys	SpaceX unlock_service SSH key write target

@@ -1,0 +1,133 @@
+# cisco_ios.magic — Cisco IOS firmware identification signatures
+#
+# Identifies Cisco IOS firmware images at the blob level (before any extraction).
+# Covers: IOS monolithic images (outer self-extracting wrapper + inner C*-UN.BIN),
+#         IOS-XE packages, and legacy IOS .bin files.
+#
+# Key discriminator: ELF e_machine = 0x00C0 (192, "CloudShield") — Cisco's custom
+# machine type for MIPS32-BE IOS images on ISR/ASR platforms.
+#
+# Install: cp cisco_ios.magic ~/.local/share/radare2/magic/
+# Usage:   file -m cisco_ios.magic <blob>
+#          /m ~/.local/share/radare2/magic/cisco_ios.magic    (from r2)
+#
+# Tested on: 15 x c1900-universalk9-mz.SPA images (15.0(1)M through 15.2(1)T)
+
+# =============================================================================
+# Cisco IOS Monolithic ELF (wrapper and inner binary)
+#
+# Discriminator chain:
+#   offset 0:  7F 45 4C 46  (ELF magic)
+#   offset 4:  01           (32-bit)
+#   offset 5:  02           (big-endian)
+#   offset 18: 00 C0        (e_machine = 0xC0 = Cisco IOS)
+#   offset 24: entry = 0x81000000 (KSEG0 base)
+#
+# Two sub-types:
+#   Wrapper (self-extracting): e_flags = 0x20002001, 8 section headers, ZIP payload
+#   Inner (C*-UN.BIN):         e_flags = 0x10001001, 11 section headers, actual IOS
+# =============================================================================
+
+# Match: ELF 32-bit MSB with e_machine=0x00C0 (C1900/C2900/C3900 — MIPS32-BE)
+0	string		\x7fELF		
+>4	byte		1		
+>>5	byte		2		
+>>>18	beshort		0x00C0		Cisco IOS ELF image (e_machine=0xC0, MIPS32-BE)
+
+# Match: ELF 32-bit MSB with e_machine=0x0033 (C1700 — PPC32-BE)
+# NOTE: readelf/file call this "Stanford MIPS-X" but the ISA is actually PowerPC!
+0	string		\x7fELF		
+>4	byte		1		
+>>5	byte		2		
+>>>18	beshort		0x0033		Cisco IOS ELF image (e_machine=0x33 Stanford_MIPS-X=PPC32-BE, c1700)
+>>>>36	belong		0x10001001	\b, inner IOS binary (e_flags=0x10001001)
+>>>>>48	beshort		11		\b, 11 sections (C*-UN.BIN monolithic image)
+>>>>>48	beshort		!11		\b, %d sections
+>>>>36	belong		0x20002001	\b, self-extracting wrapper (e_flags=0x20002001)
+>>>>>48	beshort		8		\b, 8 sections (ZIP payload embedded)
+>>>>36	belong		!0x10001001
+>>>>>36	belong		!0x20002001	\b, e_flags=0x%08x (unknown variant)
+>>>>24	belong		0x81000000	\b, entry=0x81000000 (KSEG0)
+>>>>24	belong		!0x81000000	\b, entry=0x%08x
+
+# =============================================================================
+# Cisco IOS ZIP payload inside wrapper
+#
+# The wrapper contains an embedded ZIP with filename "C*-UN.BIN" at a
+# variable offset (~94K-104K depending on version). We match the ZIP
+# local file header + filename pattern.
+# =============================================================================
+
+# ZIP local file header 50 4B 03 04 with IOS filename pattern
+0	string		PK\x03\x04	
+>26	beshort		>8		
+>>30	string		C1900-UN.BIN	Cisco IOS 1900 Series payload (extracted from wrapper ZIP)
+>>30	string		C2900-UN.BIN	Cisco IOS 2900 Series payload (extracted from wrapper ZIP)
+>>30	string		C3900-UN.BIN	Cisco IOS 3900 Series payload (extracted from wrapper ZIP)
+>>30	string		C800-UN.BIN	Cisco IOS 800 Series payload (extracted from wrapper ZIP)
+>>30	string		C1800-UN.BIN	Cisco IOS 1800 Series payload (extracted from wrapper ZIP)
+>>30	string		C7200-UN.BIN	Cisco IOS 7200 Series payload (extracted from wrapper ZIP)
+>>30	string		C1700-TP.BIN	Cisco IOS 1700 Series PAGENT payload (extracted from wrapper ZIP)
+>>30	string		C1700-AD.BIN	Cisco IOS 1700 Series AdventEnterprise payload
+>>30	regex		C1700-.*\.BIN	Cisco IOS 1700 Series payload (extracted from wrapper ZIP)
+
+# =============================================================================
+# Cisco IOS version identification strings
+#
+# CW_SYSDESCR is the canonical version identifier, always present in IOS images.
+# Format: CW_SYSDESCR$Cisco IOS Software, <platform> Software (<image>), Version <ver>
+# =============================================================================
+
+0	search/4096	CW_SYSDESCR$Cisco IOS	Cisco IOS version descriptor
+>0	string		x	\b: %.80s
+
+# Also match in rodata region of large binaries (search deeper)
+0	search/131072	Cisco IOS Software,	Cisco IOS Software identification string
+>0	string		x	\b: %.100s
+
+# =============================================================================
+# Cisco IOS-XE / Bundle Mode
+#
+# IOS-XE uses a different container format (sub-packages in tar/gzip)
+# Magic: "IOS-XE Software" in version string area
+# =============================================================================
+
+0	search/4096	CW_SYSDESCR$Cisco IOS-XE	Cisco IOS-XE version descriptor
+>0	string		x	\b: %.80s
+
+# =============================================================================
+# Cisco ROMMON (ROM Monitor)
+#
+# ROMMON has a different signature — smaller binary, different entry
+# Magic: "ROMMON" string near start
+# =============================================================================
+
+0	search/1024	ROMMON		
+>0	string		x		Cisco ROMMON image marker: %.20s
+
+# =============================================================================
+# Cisco IOS copyright string (present in all IOS images)
+#
+# This is a fallback matcher for fragments or partial images
+# =============================================================================
+
+0	search/131072	Copyright (c) 1986	
+>0	regex		Cisco Systems	Cisco IOS copyright (1986-era, Cisco Systems)
+
+# =============================================================================
+# Cisco IOS c1700 self-decompressing wrapper (FEEDFACE + PKZIP)
+#
+# c1700 -mz images use a different container than C1900:
+#   e_machine = 0x33 (Stanford MIPS-X → actually PPC)
+#   Entry: 0x80008000
+#   Section [6] at file offset ~0x467c contains:
+#     FEEDFACE magic (4 bytes) + sizes/checksums + PK\x03\x04 ZIP container
+#   The ZIP contains a single file: C1700-XX.BIN (the decompressed IOS)
+#
+# Match FEEDFACE followed by PKZIP within 32 bytes
+# =============================================================================
+
+0	belong		0xFEEDFACE	
+>20	string		PK\x03\x04	Cisco IOS c1700 FEEDFACE+PKZIP compressed payload
+>>50	string		x		\b, inner file: %.20s
+

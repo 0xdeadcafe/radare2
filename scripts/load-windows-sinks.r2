@@ -1,0 +1,1 @@
+. /usr/local/share/radare2/scripts/windows-sinks.r2

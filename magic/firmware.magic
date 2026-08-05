@@ -1,0 +1,182 @@
+# Supplementary firmware signatures for radare2
+# Only includes signatures NOT already in radare2's default magic
+#
+# Install: cp firmware.magic ~/.local/share/radare2/magic/
+# Usage:   /m ~/.local/share/radare2/magic/firmware.magic
+
+# =============================================================================
+# DJI Drone Firmware Formats
+# =============================================================================
+
+# DJI xV4 Firmware Container - main firmware package format
+# Used for Phantom, Mavic, Spark, Inspire, etc.
+0	lelong		0x12345678	DJI xV4 firmware package
+>4	leshort		0x0000		\b, format 2014
+>4	leshort		0x0001		\b, format 2015-2017
+>4	leshort		>0x0001		\b, format 2016+ (ver 0x%04x)
+>12	string		x		\b, manufacturer: %.16s
+>28	string		x		\b, model: %.16s
+
+# DJI IM*H Signed Module - encrypted/signed firmware modules
+# Found inside xV4 containers or as standalone .sig files
+0	string		IM*H		DJI IMaH signed firmware module
+>4	lelong		0x0000		\b, version 2016
+>4	lelong		0x0001		\b, version 2017
+>4	lelong		0x0002		\b, version 2018
+>64	string		x		\b, name: %.32s
+
+# Ambarella A7/A9 Partition Header - camera firmware partitions
+# Magic at offset 24 within 256-byte partition header
+24	lelong		0xA324EB90	Ambarella firmware partition
+>16	lelong		x		\b, load addr: 0x%08x
+>12	lelong		x		\b, size: %d bytes
+
+# Ambarella ROMFS Filesystem - ROM data partition
+# Magic at offset 4, file count at offset 0
+4	lelong		0x66FC328A	Ambarella ROMFS filesystem
+>0	lelong		x		\b, %d files
+
+# DJI Partition Table
+0	string		PL*I		DJI partition table image
+
+# DJI Mavic FC Encrypted Container
+0	string		MFVC		DJI Mavic FC encrypted container
+
+# =============================================================================
+# Rockchip Firmware Formats
+# =============================================================================
+
+# Rockchip Firmware - used in some DJI products
+0	string		RKFW		Rockchip firmware image
+
+# Rockchip Archive Format
+0	string		RKAF		Rockchip archive format
+
+# =============================================================================
+# Generic Firmware Formats
+# =============================================================================
+
+# TRX firmware header (Broadcom routers) - not in r2
+0	string		HDR0		TRX firmware header
+>4	lelong		x		\b, size: %d bytes
+
+# SEAMA firmware header - not in r2
+0	belong		0x5EA3A417	SEAMA firmware header
+
+# Netgear CHK - not in r2  
+0	string		\x2a\x23\x24\x5e	Netgear CHK header
+
+# D-Link headers - not in r2
+0	string		SHRS		D-Link SHRS header
+0	string		DLKE		D-Link DLKE header
+
+# JBOOT headers - not in r2
+0	string		sch2		JBOOT SCH2 header
+0	string		STAG		JBOOT STAG header
+
+# UBI detailed (r2 has basic) - not in r2
+0	string		UBI#		UBI image
+>4	byte		x		\b, version %d
+
+# SquashFS LZMA variants - not in r2
+0	string		sqlz		SquashFS (LZMA), big endian
+0	string		qshs		SquashFS (LZMA), little endian
+
+# Arcadyan obfuscated - not in r2
+0	string		\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5d	Arcadyan obfuscated LZMA
+
+# =============================================================================
+# Compression Formats (supplements to r2 built-in)
+# =============================================================================
+
+# LZ4 frame format - not always detected by r2
+0	string		\x04\x22\x4D\x18	LZ4 compressed data (frame format)
+
+# =============================================================================
+# Cisco IOS Firmware Formats
+# =============================================================================
+
+# Cisco IOS ELF (e_machine = 0x00C0 = 192)
+# Covers: ISR 1900/2900/3900, ASR 1000, Catalyst 6500
+# Both self-extracting wrapper and inner monolithic binary
+# See cisco_ios.magic for detailed sub-type identification
+0	string		\x7fELF
+>4	byte		1
+>>5	byte		2
+>>>18	beshort		0x00C0		Cisco IOS ELF firmware (MIPS32-BE, e_machine=0xC0)
+
+# Icom firmware containers (brief stubs — see icom_firmware.magic for full coverage)
+# Products: IC-905, IC-705, IC-R8600 DAT (AES/LZSS), FIRM (VxWorks), DU3 (AES)
+0	string	FIRM			Icom FIRM firmware container (VxWorks MIPS32 BE)
+0	string	\x44\x22\x00\x99	Icom IC-905 firmware update container (AES-encrypted)
+>4	string	x			\b, version: %.40s
+0	string	\x44\x00\x77\x55	Icom IC-705 firmware update container (AES-encrypted)
+>4	string	x			\b, version: %.40s
+0	string	\x44\x55\x33\x00	Icom DU3 firmware update container (AES-encrypted)
+0	lelong	0x88118833		Icom IC-R8600 firmware bundle (LZSS compressed)
+
+# =============================================================================
+# LZMA standalone (7-Zip) compressed files
+# Magic: 5D 00 00 / 5D 00 08 (properties byte + dict size)
+# Used in VxWorks compressed kernel images and some firmware blobs
+# =============================================================================
+0	string	\x5d\x00\x00	LZMA compressed data (standalone, props=0x5d)
+>5	lelong	x		\b, uncompressed size hint: 0x%08x
+0	string	\x5d\x00\x08	LZMA compressed data (standalone, props=0x5d dict=8MB)
+
+# =============================================================================
+# U-Boot FIT (Flattened Image Tree) — itb format
+# Magic: D0 0D FE ED  (big endian device tree blob)
+# Used for: kernel+initrd+dtb combined images, verified boot
+# =============================================================================
+0	belong	0xD00DFEED	U-Boot FIT image (Flattened Device Tree / itb)
+>4	belong	x		\b, totalsize: %u bytes
+
+# =============================================================================
+# Zyxel firmware header (e.g. VMG/EMG/NBG/GS routers)
+# Magic: SYN\x00 or ZLD\x00 or ZY02/ZY04 header variants
+# =============================================================================
+0	string	SYN\x00		Zyxel firmware image (SYN header)
+>4	lelong	x		\b, length: 0x%08x
+0	string	ZLD\x00		Zyxel ZLD firmware image
+0	string	ZY02		Zyxel firmware v2 (ZY02 magic)
+0	string	ZY04		Zyxel firmware v4 (ZY04 magic)
+0	string	ROMD		Zyxel ROM-D firmware container
+
+# =============================================================================
+# HIMAX MCU / camera firmware (used in various security camera chips)
+# Magic: 48 49 4D 41 58  "HIMAX"
+# =============================================================================
+0	string	HIMAX		HIMAX MCU/camera firmware image
+>5	byte	x		\b, type=0x%02x
+
+# =============================================================================
+# OpenWrt sysupgrade image (sysupgrade.tar)
+# Contains kernel + rootfs in tar format with metadata
+# Detectable by "sysupgrade-tar\n" in tar comment
+# =============================================================================
+0	string	sysupgrade-tar	OpenWrt sysupgrade tar image
+0	string	SYSUPGRADE	OpenWrt sysupgrade metadata
+
+# =============================================================================
+# Linksys firmware (E-series, WRT series)
+# Magic: W54S (older WRT54G) or W54G
+# =============================================================================
+0	string	W54S		Linksys WRT54G firmware image
+0	string	W54G		Linksys WRT54G firmware image (variant)
+0	string	\x01\x00\x00\x10	Linksys/Broadcom CFE firmware image
+
+# =============================================================================
+# Motorola S-record (SREC) hex format
+# Used in firmware upload for some embedded targets
+# =============================================================================
+0	string	S0		Motorola S-record (SREC) hex firmware
+>2	string	x		\b, header: %.10s
+
+# =============================================================================
+# Intel HEX format (.hex)
+# Record: ':' byte-count(2) address(4) record-type(2) data checksum
+# =============================================================================
+0	regex	^:[0-9A-Fa-f]{8,}	Intel HEX firmware record
+>7	string	02		\b, extended segment address record
+>7	string	04		\b, extended linear address record

@@ -1,0 +1,194 @@
+# Firmware header format definitions for radare2
+#
+# Install: cp firmware.pf ~/.local/share/radare2/format/
+# Usage:   . ~/.local/share/radare2/format/firmware.pf
+#          pf.uimage_header @ offset
+#
+# Or load inline with single command, e.g.:
+#   pf edddddddbbbb[32]z magic hcrc time size load entry dcrc os arch type comp name
+
+# ============================================================================
+# U-Boot uImage header (64 bytes, big-endian)
+# ============================================================================
+# Magic: 0x27051956
+pf.uimage_header=edddddddbbbb[32]z magic hcrc time size load entry dcrc os arch type comp name
+
+# ============================================================================
+# TRX firmware header (28 bytes, little-endian) - Broadcom routers
+# ============================================================================
+# Magic: "HDR0"
+pf.trx_header=[4]zddww[3]d magic length crc32 flags version offsets
+
+# ============================================================================
+# SEAMA header (16 bytes, big-endian)
+# ============================================================================
+# Magic: 0x5EA3A417
+pf.seama_header=eddww magic reserved metasize imagesize
+
+# ============================================================================
+# SquashFS v4 superblock (96 bytes, little-endian)
+# ============================================================================
+# Magic: "hsqs" (LE v4 standard); "sqsh" = BE variant (swap endian)
+# Layout: 5×dword, 6×word, 8×qword = 20+12+64 = 96 bytes
+pf.squashfs_super=dddddwwwwwwqqqqqqqq magic inodes mkfs_time blksz fragments compression block_log flags no_ids vers_major vers_minor root_inode bytes_used id_table xattr_table inode_table dir_table frag_table export_table
+
+# ============================================================================
+# UBI EC (Erase Counter) header (64 bytes, big-endian)
+# ============================================================================
+# Magic: "UBI#" (0x55424923)
+# Real layout: magic(4) version(1) pad(3) ec(8) vid_hdr_offs(4) data_offs(4) img_seq(4) pad(32) hdr_crc(4) = 64 bytes
+# 'e' at start toggles to big-endian for all multi-byte fields
+pf.ubi_ec_header=e[4]zb[3]bqddd[32]bd magic version padding1 ec vid_hdr_offset data_offset image_seq padding2 hdr_crc
+
+# ============================================================================  
+# JFFS2 node header (12 bytes, little-endian by default)
+# ============================================================================
+# Magic: 0x1985 (LE) or 0x8519 (BE)
+pf.jffs2_node=wwdd magic nodetype totlen hcrc
+
+# ============================================================================
+# CPIO newc header (110 bytes, ASCII hex)
+# ============================================================================
+# Magic: "070701" or "070702"
+pf.cpio_newc=[6]z[8]z[8]z[8]z[8]z[8]z[8]z[8]z[8]z[8]z[8]z[8]z[8]z magic ino mode uid gid nlink mtime filesize devmaj devmin rdevmaj rdevmin namesize
+
+# ============================================================================
+# Android boot image header (v0, 1632 bytes)
+# ============================================================================
+# Magic: "ANDROID!"
+pf.android_boot=[8]zdddddddddd[16]z[512]z[32]z magic kernel_size kernel_addr ramdisk_size ramdisk_addr second_size second_addr tags_addr page_size header_version os_version name cmdline id
+
+# ============================================================================
+# DJI xV4 Firmware Package Header (64 bytes, little-endian)
+# ============================================================================
+# Magic: 0x12345678
+# Used for Phantom, Mavic, Spark, Inspire firmware packages
+pf.dji_xv4_header=dwwd[16]z[16]zwdd[10]b magic magic_ver hdrend_offs timestamp manufacturer model entry_count ver_latest_enc ver_rollbk_enc padding
+
+# ============================================================================
+# DJI xV4 Firmware Module Entry (52 bytes, little-endian)
+# ============================================================================
+# Follows xV4 header, one per module
+# target: bits 0-4 = kind, bits 5-7 = model
+# spcoding: bits 0-3 = splvalue, bits 4-7 = encrypt_type
+pf.dji_xv4_entry=bbwddddd[16]b[16]b target spcoding reserved2 version dt_offs stored_len decrypted_len stored_md5 decrypted_md5
+
+# ============================================================================
+# DJI IM*H Signed Module Header (192 bytes, little-endian)
+# ============================================================================
+# Magic: "IM*H"
+# Encrypted/signed firmware modules (.sig files)
+pf.dji_imah_header=[4]zdd[4]bddddbbbbx[4]z[4]z[16]b[32]z[4]zdd magic header_version size reserved header_size signature_size payload_size target_size os arch compression anti_version auth_alg auth_key enc_key scram_key name type version date
+
+# ============================================================================
+# DJI IM*H Chunk Header (32 bytes, little-endian)
+# ============================================================================
+# Follows IM*H header, one per chunk
+pf.dji_imah_chunk=[4]zdddq[8]b id offset size attrib address reserved
+
+# ============================================================================
+# DJI Mavic FC Encryption Header (41 bytes, little-endian)
+# ============================================================================
+# Second-layer encryption for Mavic/Spark/Inspire2/P4 Flight Controllers
+pf.dji_mvfc_header=bd[4]bbd d db[16]bw target unk0 version unk1 size unk2 time unk3 md5 crc16
+
+# ============================================================================
+# Ambarella A9 Main Header (40 bytes, little-endian)
+# ============================================================================
+# Camera firmware for DJI drones (Phantom 3, etc.)
+pf.amba_a9_header=[32]zdd model_name ver_info crc32
+
+# ============================================================================
+# Ambarella Module Entry (8 bytes, little-endian)
+# ============================================================================
+# Follows Ambarella main header
+pf.amba_mod_entry=dd dt_len crc32
+
+# ============================================================================
+# Ambarella Partition Header (256 bytes, little-endian)
+# ============================================================================
+# Magic: 0xA324EB90 at offset 24
+# Partition types: sys, dsp_fw, rom_fw, lnx, rfs
+pf.amba_part_header=dddddddd[224]b crc32 version build_date dt_len mem_addr flag1 magic flag2 padding
+
+# ============================================================================
+# Ambarella ROMFS Partition Header (2048 bytes, little-endian)
+# ============================================================================
+# Magic: 0x66FC328A at offset 4
+pf.amba_romfs_header=dd[2040]b file_count magic padding
+
+# ============================================================================
+# Ambarella ROMFS File Entry (128 bytes, little-endian)
+# ============================================================================
+# Magic: 0x2387AB76 at offset 124
+pf.amba_romfs_entry=[116]zddd filename offset length magic
+
+# ============================================================================
+# DJI DUPC Protocol Packets (Dji Unified Packet Container)
+# ============================================================================
+# Communication protocol between drone components over serial/USB
+# Used in Phantom, Mavic, Inspire series
+
+# DUPC Type 0x55 Header (4 bytes + variable payload)
+# Byte 0: 0x55 magic
+# Byte 1-2: length (10 bits) + version (6 bits)
+# Byte 3: header CRC8
+pf.dji_dupc55_hdr=bwb magic length_ver hcrc
+
+# DUPC Type 0x55 Full Packet Header (13 bytes before payload)
+# After hdr: src_addr, dst_addr, seq_num, cmd_type_enc, cmd_set, cmd_id
+pf.dji_dupc55_full=bwbbbwbbb magic length_ver hcrc src dst seq cmd_type cmd_set cmd_id
+
+# DUPC Type 0x55 Wi-Fi EXEC_COMMAND frame (cmd_set=0x07, cmd_id=0x10)
+# Payload: 1-byte cmd_len + null-terminated command string passed to system()
+# Primary RCE injection frame. See: vault/Patterns/DJI_DUPC_Unauthenticated_Command.md
+pf.dji_wifi_cmd_exec=bwbbbwbbbbz magic length_ver hcrc src dst seq cmd_type cmd_set cmd_id cmd_len command_str
+
+# DUPC SET_WIFI_SSID frame (cmd_set=0x07, cmd_id=0x02)
+pf.dji_wifi_set_ssid=bwbbbwbbbbz magic length_ver hcrc src dst seq cmd_type cmd_set cmd_id ssid_len ssid
+
+# DUPC SET_WIFI_PASSWORD frame (cmd_set=0x07, cmd_id=0x03)
+pf.dji_wifi_set_password=bwbbbwbbbbz magic length_ver hcrc src dst seq cmd_type cmd_set cmd_id pass_len password
+
+# DUPC Type 0xAB Header (4 bytes + variable payload)
+# Byte 0: 0xAB magic
+# Byte 1: length
+# Byte 2-3: reserved/flags
+pf.dji_dupcab_hdr=bbbb magic length flags1 flags2
+
+# ============================================================================
+# DJI FlyC Parameter Entry (variable size)
+# ============================================================================
+# Flight Controller parameters table entries
+pf.dji_flyc_param=dw[32]z hash type name
+
+# ============================================================================
+# DJI Encryption Key Info Block (16-byte aligned)
+# ============================================================================
+# Key identifier block found in encrypted modules
+pf.dji_key_info=[4]z[4]z[8]b enc_key auth_key reserved
+
+# ============================================================================
+# U-Boot FIT (Flattened Image Tree) header — 48 bytes (same as FDT blob)
+# ============================================================================
+# magic = 0xD00DFEED (big-endian)
+# Layout: magic(4) totalsize(4) off_dt_struct(4) off_dt_strings(4) off_mem_rsvmap(4)
+#         version(4) last_comp_version(4) boot_cpuid_phys(4) size_dt_strings(4) size_dt_struct(4)
+pf.fit_header=edddddddddd magic totalsize off_dt_struct off_dt_strings off_mem_rsvmap version last_comp_version boot_cpuid_phys size_dt_strings size_dt_struct
+
+# ============================================================================
+# Android boot image header (v0/v1, most common)
+# ============================================================================
+# Uses c format character (char) for string arrays to display as strings
+pf.android_boot=[8]zddddddddddd[16]z[512]z[8]z magic kernel_size kernel_addr ramdisk_size ramdisk_addr second_size second_addr tags_addr page_size header_version os_version name cmdline id
+
+# ============================================================================
+# JFFS2 directory entry node (16 bytes + variable name)
+# ============================================================================
+pf.jffs2_dirent=wwdddwb magic nodetype totlen hcrc pino version ino name_crc
+
+# ============================================================================
+# LZ4 frame header (7 bytes minimum)
+# ============================================================================
+# magic = 0x184D2204 (LE), flag byte, block max size, content size (optional)
+pf.lz4_frame_header=dwb magic magic_nb flg

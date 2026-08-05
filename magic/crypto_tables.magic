@@ -1,0 +1,196 @@
+# crypto_tables.magic — CRC/crypto lookup table identification for firmware RE
+#
+# Identifies embedded algorithm tables in loaded binary images.
+# Use from r2: /m ~/.local/share/radare2/magic/crypto_tables.magic
+# Or from a profile: /m magic/crypto_tables.magic
+#
+# Install: cp crypto_tables.magic ~/.local/share/radare2/magic/
+#
+# Proven on DJI P3C clisrv:
+#   CRC8  (Dallas/Maxim) @ 0x419030
+#   CRC16 (CCITT)        @ 0x419130
+# Proven on wpad (OpenWrt):
+#   SHA-256 constants    @ multiple offsets
+#   AES inverse S-box    @ multiple offsets
+
+# =============================================================================
+# CRC-8 (Dallas/Maxim, poly=0x31)
+# Table[0..7] = 00 31 62 53 C4 F5 A6 97
+# Used in DJI DUPC 0x55 protocol (seed=0x77)
+# =============================================================================
+0	string	\x00\x31\x62\x53\xc4\xf5\xa6\x97	CRC-8 Dallas/Maxim lookup table (poly 0x31)
+>1	byte	x	\b, [1]=0x%02x
+
+# =============================================================================
+# CRC-16 CCITT (poly=0x1021, big-endian table)
+# Table[0..3] = 0000 1021 2042 3063
+# Used in DJI DUPC 0x55 protocol (seed=0x3692)
+# =============================================================================
+0	string	\x00\x00\x10\x21\x20\x42\x30\x63	CRC-16-CCITT lookup table (big endian, poly 0x1021)
+>2	beshort	x	\b, [1]=0x%04x
+
+# CRC-16 CCITT (little-endian variant)
+# Table[1] = 0x2110 (little endian of 0x1021)
+2	leshort	0x2110	CRC-16-CCITT lookup table (little endian, poly 0x1021)
+
+# =============================================================================
+# CRC-32 (IEEE 802.3, poly=0xEDB88320, little-endian table)
+# Table[1] = 0x77073096
+# =============================================================================
+4	lelong	0x77073096	CRC-32 (IEEE 802.3) lookup table
+>4	lelong	x	\b, table[1]=0x%08x
+
+# CRC-32 (IEEE 802.3, big-endian table)
+# Table[1] = 0x04C11DB7 big endian = 04 C1 1D B7
+4	belong	0x04C11DB7	CRC-32 (IEEE 802.3) lookup table (big endian)
+
+# =============================================================================
+# CRC-32C (Castagnoli, poly=0x82F63B78, little-endian table)
+# Table[1] = 0xF26B8303
+# =============================================================================
+4	lelong	0xF26B8303	CRC-32C (Castagnoli) lookup table
+>4	lelong	x	\b, table[1]=0x%08x
+
+# =============================================================================
+# AES forward S-box (SubBytes table, encryption)
+# Bytes[0..7] = 63 7C 77 7B F2 6B 6F C5
+# =============================================================================
+0	string	\x63\x7c\x77\x7b\xf2\x6b\x6f\xc5	AES forward S-box (SubBytes, encryption)
+>0	byte	x	\b, [0]=0x%02x
+
+# =============================================================================
+# AES inverse S-box (InvSubBytes table, decryption)
+# Bytes[0..7] = 52 09 6A D5 30 36 A5 38
+# =============================================================================
+0	string	\x52\x09\x6a\xd5\x30\x36\xa5\x38	AES inverse S-box (InvSubBytes, decryption)
+>0	byte	x	\b, [0]=0x%02x
+
+# =============================================================================
+# SHA-256 round constants (big-endian, 64 x uint32)
+# K[0..1] = 428A2F98 71374491
+# =============================================================================
+0	string	\x42\x8a\x2f\x98\x71\x37\x44\x91	SHA-256 round constants (K[0]=0x428a2f98)
+>0	belong	x	\b, K[0]=0x%08x
+
+# =============================================================================
+# SHA-1 round constants (big-endian)
+# K[0] = 5A827999
+# =============================================================================
+0	belong	0x5A827999	SHA-1 round constant K[0] (0x5a827999)
+
+# =============================================================================
+# MD5 T-table (little-endian)
+# T[1] = 0xD76AA478 → bytes: 78 A4 6A D7
+# T[2] = 0xE8C7B756 → bytes: 56 B7 C7 E8
+# =============================================================================
+0	string	\x78\xa4\x6a\xd7\x56\xb7\xc7\xe8	MD5 T-table (Prentice Hall, little endian)
+>0	lelong	x	\b, T[1]=0x%08x
+
+# =============================================================================
+# Blowfish P-array (big-endian)
+# P[0] = 0x243F6708 (hex digits of pi)
+# =============================================================================
+0	belong	0x243F6708	Blowfish P-array (P[0]=0x243f6708, pi digits)
+>0	belong	x	\b, P[0]=0x%08x
+
+# =============================================================================
+# DES IP permutation table
+# First 8 bytes: 3A 32 2A 22 1A 12 0A 02
+# =============================================================================
+0	string	\x3a\x32\x2a\x22\x1a\x12\x0a\x02	DES IP permutation table
+
+# =============================================================================
+# ChaCha20 / Salsa20 "expand 32-byte k" constant
+# ASCII string embedded in code
+# =============================================================================
+0	string	expand 32-byte k	ChaCha20/Salsa20 expansion constant ("expand 32-byte k")
+
+# =============================================================================
+# RC4 initial state (ascending 0x00..0xFF, 256 bytes)
+# First 32 bytes: 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 ...
+# Note: use a 32-byte match to reduce false positives vs. sequential arrays
+# =============================================================================
+0	string	\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f	RC4 initial S-box state (0x00..0xff sequential)
+
+# =============================================================================
+# Twofish MDS matrix (first row: 01 EF 5B 5B)
+# =============================================================================
+0	string	\x01\xef\x5b\x5b	Twofish MDS matrix (first row)
+
+# =============================================================================
+# SHA-512 round constants (big-endian, first constant)
+# K[0] = 428A2F98D728AE22
+# =============================================================================
+0	string	\x42\x8a\x2f\x98\xd7\x28\xae\x22	SHA-512 round constants (K[0]=0x428a2f98d728ae22)
+
+# =============================================================================
+# CAMELLIA S-box (first 8 bytes: 0070380029C7F27D)
+# Camellia is used in TLS 1.2 cipher suites on embedded targets
+# =============================================================================
+0	string	\x00\x70\x38\x00\x29\xc7\xf2\x7d	Camellia cipher S-box (SBOX1_1110)
+>0	byte	x	\b, [0]=0x%02x
+
+# =============================================================================
+# SEED cipher (Korean standard, ISO/IEC 18033-3)
+# SEED S-box S0: first 8 bytes A9 84 EB FA C2 26 BB 24
+# =============================================================================
+0	string	\xa9\x84\xeb\xfa\xc2\x26\xbb\x24	SEED cipher S-box (Korean standard)
+
+# =============================================================================
+# ARIA cipher (Korean national standard, RFC 5794)
+# ARIA S1 first bytes: 77 04 20 E8 F2 1B 46 6F
+# =============================================================================
+0	string	\x77\x04\x20\xe8\xf2\x1b\x46\x6f	ARIA cipher S-box (Korean standard, RFC 5794)
+
+# =============================================================================
+# SM4 cipher (Chinese national standard GB/T 32907-2016)
+# SM4 S-box: first 8 bytes D6 90 E9 FE CC E1 3D B7
+# Common in Chinese-made IoT firmware (DJI, Hikvision, Dahua)
+# =============================================================================
+0	string	\xd6\x90\xe9\xfe\xcc\xe1\x3d\xb7	SM4 cipher S-box (Chinese standard GB/T 32907-2016)
+>0	byte	x	\b, [0]=0x%02x
+
+# =============================================================================
+# XTEA key schedule (block cipher, 64-byte delta array)
+# Uses delta = 0x9E3779B9 repeated; LE: B9 79 37 9E
+# =============================================================================
+4	lelong	0x9E3779B9	XTEA/TEA cipher round constant delta (0x9e3779b9)
+4	belong	0x9E3779B9	XTEA/TEA cipher round constant delta, big endian
+
+# =============================================================================
+# Whirlpool hash function C-box (first 8 bytes: 18 23 C6 E8 87 F8 98 B8)
+# =============================================================================
+0	string	\x18\x23\xc6\xe8\x87\xf8\x98\xb8	Whirlpool hash function C-box
+
+# =============================================================================
+# CAST-5 (CAST-128) cipher S-box 1
+# First 4 bytes: 30FB40D4 (big endian)
+# =============================================================================
+0	belong	0x30FB40D4	CAST-5 (CAST-128) cipher S-box 1 (first word)
+
+# =============================================================================
+# Poly1305 MAC: r-clamping string (in source/debug symbols)
+# Only fire on the specific null-prefixed pattern to reduce false positives
+# =============================================================================
+0	string	\x00r clamped	Poly1305 MAC implementation (r-clamping debug string)
+
+# =============================================================================
+# CRC-16 IBM/ANSI (poly=0x8005, little-endian table)
+# Table[1] = 0x8005 → LE: 05 80
+# Commonly used in industrial protocols (Modbus, CAN)
+# =============================================================================
+2	leshort	0x8005	CRC-16 IBM/ANSI lookup table (poly 0x8005, Modbus/CAN)
+
+# =============================================================================
+# Curve25519 / X25519 prime constant
+# p = 2^255 - 19 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFED
+# Last 8 bytes (little endian): ED FF FF FF FF FF FF 7F
+# =============================================================================
+0	string	\xed\xff\xff\xff\xff\xff\xff\x7f	Curve25519/X25519 field prime constant (p = 2^255-19)
+
+# =============================================================================
+# HMAC-SHA1 / HMAC-SHA256 ipad/opad constants
+# ipad = 0x36 repeated 64 times, opad = 0x5C repeated
+# =============================================================================
+0	string	\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36	HMAC ipad constant (0x36 * 32)
+0	string	\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c\x5c	HMAC opad constant (0x5c * 32)

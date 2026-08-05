@@ -1,0 +1,63 @@
+# Juniper JunOS Firmware Signatures
+# Matches JunOS package components and the proprietary 55AA block-compressed format
+#
+# Install: cp juniper_junos.magic ~/.local/share/radare2/magic/
+# Usage:   /m ~/.local/share/radare2/magic/juniper_junos.magic
+
+# =============================================================================
+# JunOS 55AA Block-Compressed ISO
+# =============================================================================
+# Found as overlay appended after the ELF section data in domestic package ELFs.
+# The 55AA header sits at overlay_start + 0x198 (after zero padding).
+# Structure: 55AA(2) + flags(2) + self_offset(4) + num_blocks(4) + meta(4)
+# Followed by TOC of (offset:4, size:4) pairs, then raw deflate blocks.
+# Decompresses to an ISO 9660 filesystem containing the full JunOS userland.
+#
+# See: /aether/vault/ArchSpecs/maps/juniper_junos_domestic_decompress.md
+# Tool: /aether/scripts/junos_domestic_decompress.py
+
+0	beshort		0x55aa		Juniper JunOS 55AA block-compressed image
+>2	beshort		0x0643		\b, format v1 (deflate blocks)
+>8	belong		x		\b, %u blocks
+>14	beshort		0x0800		\b, ISO sector-aligned
+
+# =============================================================================
+# JunOS Domestic Package ELF (interpreter = /red/herring)
+# =============================================================================
+# Juniper uses "/red/herring" as the ELF interpreter path for their self-extracting
+# package binaries. This is unique to JunOS — no other vendor uses this string.
+# The ELF contains both the JunOS monolithic binary AND an appended compressed ISO.
+# MIPS64 big-endian, 32-bit mode (ELF32 MSB).
+
+0	belong		0x7f454c46	
+>5	byte		0x02		
+>16	beshort		0x0002		
+>18	beshort		0x0008		
+>0x100	search/512	/red/herring	Juniper JunOS domestic package ELF (MIPS, /red/herring interpreter)\b
+>>0	byte		x		\b, contains 55AA block-compressed ISO as overlay
+
+# =============================================================================
+# JunOS Package Metadata (inside .tgz outer tarball)
+# =============================================================================
+# The metatags file at the root of the outer tarball identifies package components.
+
+0	string		KERNEL=		Juniper JunOS package metatags
+>0	search/128	ROOTFS=		\b, has rootfs
+
+# =============================================================================
+# JunOS Package Comment (FreeBSD pkg format)
+# =============================================================================
+# The +COMMENT file inside the outer tarball contains the version string.
+
+0	string		JUNOS\ Software\ Release	Juniper JunOS package comment
+>24	byte		0x5b		\b, version:
+>>25	string		x		\b %.40s
+
+# =============================================================================
+# JunOS Compressed ISO fstype marker (inside domestic ELF strings)
+# =============================================================================
+# Embedded string that identifies the compressed ISO format.
+# Found via: strings domestic_elf | grep "fstype=iso9660"
+
+0	string		fstype=iso9660,\ compressed,\ packageName=	Juniper JunOS compressed ISO descriptor
+>42	string		x	\b, package: %.64s

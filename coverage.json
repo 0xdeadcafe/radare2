@@ -1,0 +1,209 @@
+{
+  "aarch64-autel": {
+    "arch": "aarch64",
+    "note": "transmit + UpgradeService + libdjiw.so; Android bionic AArch64",
+    "profile": true,
+    "symbols": true,
+    "vendor": "autel",
+    "zsigs": true
+  },
+  "aarch64-dell": {
+    "arch": "aarch64",
+    "note": "no dedicated dell-aarch64 profile; use linux-musl-arm64.r2 + session zsigs",
+    "profile": false,
+    "symbols": true,
+    "vendor": "dell",
+    "zsigs": true
+  },
+  "aarch64-hpe": {
+    "arch": "aarch64",
+    "note": "hpe-ilo7-arm64.r2 created; no zsigs yet (binary not fully analysed)",
+    "profile": true,
+    "symbols": false,
+    "vendor": "hpe",
+    "zsigs": false
+  },
+  "aarch64-spacex": {
+    "arch": "aarch64",
+    "note": "musl ARM64; spacex-starlink-musl-arm64.r2 + session zsigs",
+    "profile": true,
+    "symbols": true,
+    "vendor": "spacex",
+    "zsigs": true
+  },
+  "arm-cobham": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "glibc ARM32; cobham-sailor-arm.r2 \u2014 glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig) (armhf apt unavailable in Docker)",
+    "profile": true,
+    "symbols": false,
+    "vendor": "cobham",
+    "zsigs": true
+  },
+  "arm-dji": {
+    "arch": "arm (little endian, 32-bit)",
+    "profile": true,
+    "symbols": true,
+    "vendor": "dji",
+    "zsigs": true
+  },
+  "arm-furuno": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "furuno-felcom-arm.r2 created; glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig)",
+    "profile": true,
+    "symbols": true,
+    "vendor": "furuno",
+    "zsigs": true
+  },
+  "arm-glibc-generic": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "linux-glibc-arm32.r2 + glibc/armhf/glibc-libc.zsig; default arch profile for ARM32 glibc",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "arm-intellian": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "intellian-arm-glibc.r2; glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig)",
+    "profile": true,
+    "symbols": false,
+    "vendor": "intellian",
+    "zsigs": true
+  },
+  "arm-jrc": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "JRC JUE-100GX uses intellian-arm-glibc.r2; symbols in symbols/jrc/",
+    "profile": false,
+    "symbols": true,
+    "vendor": "jrc",
+    "zsigs": false
+  },
+  "arm-musl-arm32": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "linux-musl-arm32.r2 + musl/armhf/musl-libc.zsig; for Alpine Linux ARM32 targets",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "arm-navico": {
+    "arch": "arm",
+    "note": "Navico/Simrad Zeus; no dedicated profile; use linux-musl-arm64.r2 or android-arm32.r2 depending on binary",
+    "profile": false,
+    "symbols": true,
+    "vendor": "navico",
+    "zsigs": false
+  },
+  "arm-netgear": {
+    "arch": "arm",
+    "note": "no dedicated profile; use linux-musl-arm64.r2 or android-arm32.r2 depending on firmware",
+    "profile": false,
+    "symbols": true,
+    "vendor": "netgear",
+    "zsigs": true
+  },
+  "arm-raymarine": {
+    "arch": "arm",
+    "note": "no dedicated profile; symbols in symbols/raymarine/",
+    "profile": false,
+    "symbols": true,
+    "vendor": "raymarine",
+    "zsigs": false
+  },
+  "arm-supermicro": {
+    "arch": "ARM 32-bit (ARM926EJ-S)",
+    "profile": true,
+    "symbols": false,
+    "vendor": "supermicro",
+    "zsigs": true
+  },
+  "arm-tp-link": {
+    "arch": "ARM 32-bit",
+    "note": "no dedicated profile; use linux-uclibc-mips.r2 or openwrt-mips*.r2",
+    "profile": false,
+    "symbols": false,
+    "vendor": "tp-link",
+    "zsigs": true
+  },
+  "arm-unknown": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "use android-arm32.r2 or linux-musl-arm64.r2 as appropriate",
+    "profile": false,
+    "symbols": false,
+    "vendor": "unknown",
+    "zsigs": true
+  },
+  "arm-viasat": {
+    "arch": "arm (little endian, 32-bit)",
+    "note": "viasat-explorer-gx-arm.r2 created; no dedicated zsigs",
+    "profile": true,
+    "symbols": false,
+    "vendor": "viasat",
+    "zsigs": true
+  },
+  "arm32-dji": {
+    "arch": "ARM32 (armeabi-v7a)",
+    "profile": true,
+    "symbols": true,
+    "vendor": "dji",
+    "zsigs": true
+  },
+  "mips-cisco": {
+    "arch": "mips32-be",
+    "profile": true,
+    "symbols": true,
+    "vendor": "cisco",
+    "zsigs": true
+  },
+  "mips-dlink": {
+    "arch": "mips (32-bit, big-endian)",
+    "note": "no dedicated profile; use openwrt-mips_24kc.r2; symbols in symbols/d-link/",
+    "profile": false,
+    "symbols": true,
+    "vendor": "d-link",
+    "zsigs": true
+  },
+  "mips-icom": {
+    "arch": "MIPS32 BE (VxWorks)",
+    "note": "icom-vxworks-mips.r2 + icom-ap90m-vxworks.r2; vxworks/vxworks.h types now loaded; uclibc/mips32 zsig available",
+    "profile": true,
+    "symbols": true,
+    "vendor": "icom",
+    "zsigs": true
+  },
+  "mips-juniper": {
+    "arch": "MIPS64 rel2 (32-bit mode), big-endian, FreeBSD",
+    "profile": true,
+    "symbols": true,
+    "vendor": "juniper",
+    "zsigs": true
+  },
+  "mips32be-netgear": {
+    "arch": "mips32be",
+    "profile": false,
+    "symbols": true,
+    "vendor": "netgear",
+    "zsigs": true
+  },
+  "ppc32-cisco": {
+    "arch": "ppc32-be",
+    "note": "cisco-ios-ppc32.r2; C1700 PAGENT binary",
+    "profile": true,
+    "symbols": true,
+    "vendor": "cisco",
+    "zsigs": true
+  },
+  "x64-juniper": {
+    "arch": "x86-64",
+    "note": "juniper-srx.r2 covers both MIPS64 and x86-64 binaries",
+    "profile": true,
+    "symbols": true,
+    "vendor": "juniper",
+    "zsigs": true
+  },
+  "x86-glibc-x64": {
+    "arch": "x86-64",
+    "note": "libc/glibc-x64.r2 loaded as libc layer; 13 debian/amd64 zsigs (libc6, libssl, zlib, curl, etc.)",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  }
+}

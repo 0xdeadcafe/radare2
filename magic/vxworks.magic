@@ -1,0 +1,147 @@
+# VxWorks binary format signatures for radare2
+# Source: wrsdk-vxworks7-qemu-1.16.1 (VxWorks OS 25.09, x86-64)
+#
+# Install: cp vxworks.magic ~/.local/share/radare2/magic/
+# Usage:   /m ~/.local/share/radare2/magic/vxworks.magic
+#
+# VxWorks ELF notes:
+#   - OSABI = 0x00 (ELFOSABI_NONE) for all VxWorks 7 binaries; no special tagging
+#   - Kernel image:  ET_EXEC (0x0002), statically linked, e_entry in locore range
+#   - RTP binary:    ET_EXEC (0x0002), dynamically linked (.vxe extension)
+#   - Shared lib:    ET_DYN  (0x0003) (.so / .so.N extension)
+#   - DKM module:    ET_REL  (0x0001), kernel module loaded at runtime (.out extension)
+#   - The .wrs_build_vars section (contains build metadata) is unique to kernel images
+#     built with Wind River Workbench / VIP but sits near end of file — not magic-accessible
+
+# =============================================================================
+# VxWorks 7 Kernel ELF — x86-64 (Intel/AMD BSP)
+# =============================================================================
+# Locore entry at 0x408000 is the standard Intel BSP load address for VxWorks 7
+# x86-64 (itl_generic, QEMU).  All known Intel BSPs share this entry point.
+#
+# NOTE: r2 /m only hits offset 0 when the file is loaded raw (r2 -n), because
+# the ELF header is not covered by a PT_LOAD segment in VxWorks kernel images.
+# With a fully-analysed session use:  /m magic_file  in a  r2 -n  session, or
+# run:  rahash2 -a magic -m vxworks.magic vxWorks
+
+0       string          \x7fELF                  ELF
+>4      byte            2                        64-bit
+>5      byte            1                        LSB
+>18     leshort         0x003e                   x86-64
+>16     leshort         0x0002                   executable
+>>24    lelong          0x00408000               \b, VxWorks 7 kernel image (x86-64, Intel BSP)
+>>>28   lelong          0x00000000               \b (locore entry 0x408000 confirmed)
+
+# =============================================================================
+# VxWorks 7 Kernel ELF — ARM 32-bit (Cortex-A BSP)
+# =============================================================================
+# VxWorks 7 ARM kernel images use the 0x10000 locore base (LE, ET_EXEC, EM_ARM)
+
+0       string          \x7fELF                  ELF
+>4      byte            1                        32-bit
+>5      byte            1                        LSB
+>18     leshort         0x0028                   ARM
+>16     leshort         0x0002                   executable
+>>24    lelong          0x00010000               \b, VxWorks 7 kernel image (ARM, locore@0x10000)
+
+# =============================================================================
+# VxWorks 7 Kernel ELF — AArch64
+# =============================================================================
+# AArch64 VxWorks 7 kernels load locore at 0x10000 (LE, ET_EXEC, EM_AARCH64)
+
+0       string          \x7fELF                  ELF
+>4      byte            2                        64-bit
+>5      byte            1                        LSB
+>18     leshort         0x00b7                   AArch64
+>16     leshort         0x0002                   executable
+>>24    lelong          0x00010000               \b, VxWorks 7 kernel image (AArch64, locore@0x10000)
+>>>28   lelong          0x00000000               \b (canonical locore confirmed)
+
+# =============================================================================
+# VxWorks DKM (Downloadable Kernel Module) — ET_REL ELF
+# =============================================================================
+# DKMs are ET_REL object files loaded into kernel space at runtime.
+# No VxWorks-specific ELF markers — identification is by .wrs_build_vars in
+# the shstrtab and the _Elf64Sym VxWorks table convention.  Best identified by
+# context: .out extension + architecture.  Listed here for completeness.
+
+0       string          \x7fELF                  ELF
+>4      byte            2                        64-bit
+>5      byte            1                        LSB
+>18     leshort         0x003e                   x86-64
+>16     leshort         0x0001                   \b, relocatable (possible VxWorks DKM)
+
+# =============================================================================
+# VxWorks .wrs_build_vars section — raw extracted blob
+# =============================================================================
+# When this section is carved out of a kernel ELF (e.g. via objcopy -j),
+# the raw content always begins with "set WIND_HOME".
+
+0       string          set\ WIND_HOME           VxWorks kernel build metadata (.wrs_build_vars)
+>14     string          x                        \b, WIND_HOME=%.60s
+
+# =============================================================================
+# VxWorks kernel/bootrom version banner  (5.x / 6.x raw images)
+# =============================================================================
+# VxWorks 5.x and 6.x embed the "@(#)vxWorks" ident string in the first 8 KB
+# of the kernel image (placed by the Wind River linker as an .identification
+# section or in the vectors table padding).  VxWorks 7 with LLVM no longer
+# always does this, but legacy BSPs do.
+
+0       search/8192     string  @(#)vxWorks              VxWorks kernel/bootrom image
+>11     string          x                                \b, version %.32s
+
+# =============================================================================
+# VxWorks ROMFS / VxWorks ROM filesystem
+# =============================================================================
+# VxWorks ROM filesystem images (wrominit / wr_romfs) sometimes begin with a
+# 4-byte magic header.  Big-endian builds of VxWorks 6.x used 0x5AA5DEAD;
+# VxWorks 7 ROM images use the standard Wind River Flash boot format.
+
+0       belong          0x5AA5DEAD               VxWorks ROM filesystem image (big-endian)
+>4      belong          x                        \b, entry count: %d
+
+# =============================================================================
+# Wind River TFTP boot image (zipped VxWorks, .vxz)
+# =============================================================================
+# Compressed VxWorks kernel images for TFTP boot: gzip-wrapped ELF with a
+# Wind River header prepended.  The 8-byte WRS magic precedes the gzip stream.
+
+0       string          WRSIMAGE                 Wind River compressed VxWorks boot image (.vxz)
+>8      byte            0x1f
+>>9     byte            0x8b                     \b, gzip-compressed kernel
+
+# =============================================================================
+# VxWorks 6.x build metadata string — works on any arch (string scan)
+# Fires on .wrs_build_vars ELF section or in the text of the kernel image.
+# More reliable than entry-point magic for MIPS/ARM VxWorks 6.x images.
+# =============================================================================
+0       string          C:/WindRiver-6              VxWorks 6.x kernel build metadata (WindRiver-6.x toolchain)
+0       string          /WindRiver/                 VxWorks kernel build metadata (WindRiver toolchain path)
+
+# =============================================================================
+# VxWorks kernel universal symbol markers (arch-independent, string scan)
+# The _wrs_kernel_text_start symbol appears in ALL VxWorks kernel images,
+# embedded in the ELF symbol table or .wrs_build_vars section.
+# =============================================================================
+0       string          wrs_kernel_text_start       VxWorks kernel image (wrs_kernel_text_start marker)
+0       string          _wrs_kernel_text_start      VxWorks kernel image (_wrs_kernel_text_start symbol)
+0       string          .wrs_build_vars             VxWorks kernel ELF (.wrs_build_vars section present)
+0       string          wrs_unmapped_text_start     VxWorks kernel ELF (wrs_unmapped sections present)
+
+# =============================================================================
+# VxWorks 6.x MIPS32 Big-Endian kernel ELF (Icom AP-90M, JRC)
+# Entry point varies by BSP (0x80010000, 0x868000c4, etc.) — use symbol markers above.
+# =============================================================================
+0       string          \x7fELF                  ELF
+>4      byte            1                        32-bit
+>5      byte            2                        MSB (big-endian)
+>18     beshort         0x0008                   MIPS
+>16     beshort         0x0002                   executable
+>>24    belong          0x80010000               \b, VxWorks 6.x kernel image (MIPS32 BE, BSP entry 0x80010000)
+0       string          \x7fELF                  ELF
+>4      byte            1                        32-bit
+>5      byte            2                        MSB (big-endian)
+>18     beshort         0x0008                   MIPS
+>16     beshort         0x0002                   executable
+>>24    belong          0x868000c4               \b, VxWorks 6.9 kernel image (MIPS32 BE, Icom AP-90M/JRC entry)

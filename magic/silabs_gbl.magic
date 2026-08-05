@@ -1,0 +1,87 @@
+# Silicon Labs Gecko Bootloader (GBL) image format
+# Reference: https://docs.silabs.com/mcu-bootloader/latest/gbl-format
+# Used in: Z-Wave 700, Zigbee EFR32, Thread, Bluetooth SoCs
+#
+# GBL images consist of tagged TLV sections:
+#   [tag(4)] [length(4)] [data(length)]
+#
+# These tags can appear at any offset inside vendor-wrapped firmware
+# (e.g., after a D-Link, Aeotec, or Zooz proprietary header).
+
+# ── GBL Header (plaintext image) ──
+# Tag 0x03A617EB, always first tag in an unencrypted GBL
+0	lelong	0x03A617EB	Silicon Labs GBL firmware image (plaintext)
+>4	lelong	x		\b, header length %u
+>8	lelong	x		\b, version 0x%08x
+>12	lelong	0x00000000	\b, type: application
+>12	lelong	0x00000001	\b, type: bootloader
+>12	lelong	0x00000002	\b, type: SE upgrade
+
+# ── GBL Header (encrypted image) ──
+# Tag 0xEB17A603, always first tag in an encrypted GBL
+0	lelong	0xEB17A603	Silicon Labs GBL firmware image (encrypted)
+>4	lelong	x		\b, header length %u
+>8	lelong	x		\b, version 0x%08x
+
+# ── GBL Application Data (program data for flash) ──
+# Tag 0xFE0101FE, contains flash address + raw data
+0	lelong	0xFE0101FE	Silicon Labs GBL program data segment
+>4	lelong	x		\b, length %u bytes
+>8	lelong	x		\b, flash address 0x%08x
+
+# ── GBL Bootloader Data ──
+# Tag 0xF50909F5, contains bootloader upgrade image
+0	lelong	0xF50909F5	Silicon Labs GBL bootloader segment
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL SE (Secure Element) Upgrade ──
+# Tag 0xF70707F7
+0	lelong	0xF70707F7	Silicon Labs GBL SE upgrade segment
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL Metadata ──
+# Tag 0xFD0303FD, vendor/application metadata
+# In D-Link DCH-S162, this contains the actual Cortex-M firmware image
+0	lelong	0xFD0303FD	Silicon Labs GBL metadata segment
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL Encryption Init ──
+# Tag 0xF60808F6, AES-CTR nonce + message counter for encrypted GBL
+0	lelong	0xF60808F6	Silicon Labs GBL encryption init (AES-CTR)
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL Encrypted Program Data ──
+# Tag 0xFA0505FA, encrypted equivalent of GBL_PROG_DATA
+0	lelong	0xFA0505FA	Silicon Labs GBL encrypted program data
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL Certificate ──
+# Tag 0xF30A0AF3, ECDSA certificate for secure boot
+0	lelong	0xF30A0AF3	Silicon Labs GBL certificate
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL Signature (ECDSA-P256) ──
+# Tag 0xF10C0CF1, ECDSA-P256-SHA256 signature over entire image
+0	lelong	0xF10C0CF1	Silicon Labs GBL ECDSA-P256 signature
+>4	lelong	x		\b, length %u bytes
+
+# ── GBL End ──
+# Tag 0xFC0404FC, marks end of GBL image, data is CRC32
+0	lelong	0xFC0404FC	Silicon Labs GBL end tag
+>4	lelong	x		\b, length %u
+>8	lelong	x		\b, CRC32 0x%08x
+
+
+# ── D-Link Z-Wave OTA header ──
+# Found wrapping GBL images in D-Link DCH-S1xx, DCH-Zxxx series
+# Magic 0x1EED90F0 at offset 0, product string at offset 0x20
+0	lelong	0x1EED90F0	D-Link Z-Wave OTA firmware container
+>4	lelong	x		\b, header info 0x%08x
+>0x14	lelong	x		\b, header size %u bytes
+>0x18	lelong	x		\b, payload size %u bytes
+>0x20	string	x		\b, product ID "%s"
+
+
+# ── Realtek Ameba Z-II (RTL8710C) markers ──
+# The Ameba SDK string is present in all RTL8710C firmware images
+0	string	AmebaZII	Realtek Ameba Z-II (RTL8710C) firmware image
