@@ -18,6 +18,10 @@ Usage:
     # Dry-run: show what would be pruned without modifying files:
     python3 tool/prune-session-zsigs.py --dry-run
 
+    # Merge duplicate-source pairs: BASE absorbs ABSORB, ABSORB is deleted.
+    # BASE is the larger/preferred zsig; ABSORB is the one to fold in.
+    python3 tool/prune-session-zsigs.py --merge BASE1:ABSORB1 --merge BASE2:ABSORB2
+
     # Override quality threshold:
     python3 tool/prune-session-zsigs.py --threshold 90
 
@@ -137,6 +141,75 @@ def update_index(key, total, named):
         fh.write("\n")
 
 
+# ── merge helpers ────────────────────────────────────────────────────────────
+
+def merge_zsig_pair(base_key, absorb_key, sessions_dir, index, dry_run=False):
+    """Merge ABSORB into BASE: load both into r2, save to base path, remove absorb.
+
+    BASE wins on name collisions (loaded second so its entries overwrite ABSORB's).
+    Returns (merged_count, absorb_count) or (0, 0) on error.
+    """
+    base_path   = os.path.join(sessions_dir, f"{base_key}.zsig")
+    absorb_path = os.path.join(sessions_dir, f"{absorb_key}.zsig")
+
+    for path, label in ((base_path, "base"), (absorb_path, "absorb")):
+        if not os.path.exists(path):
+            print(f"  ERROR: {label} zsig not found: {path}", file=sys.stderr)
+            return 0, 0
+
+    absorb_entries = read_zsig_entries(absorb_path)
+    base_entries   = read_zsig_entries(base_path)
+
+    if dry_run:
+        all_names = set(absorb_entries) | set(base_entries)
+        print(f"  [dry-run] would merge {len(absorb_entries)} absorb sigs into"
+              f" {len(base_entries)} base sigs -> ~{len(all_names)} unique")
+        return len(all_names), len(absorb_entries)
+
+    # Load absorb first, then base (base wins on name collision)
+    r2 = r2pipe.open("malloc://1", flags=["-e", "scr.color=0", "-2"])
+    r2.cmd(f"zo {absorb_path}")
+    r2.cmd(f"zo {base_path}")
+    try:
+        merged_count = int(r2.cmd("z~?").strip())
+    except ValueError:
+        merged_count = 0
+
+    tmp = base_path + ".merge_tmp"
+    r2.cmd(f"zos {tmp}")
+    r2.quit()
+
+    if not os.path.exists(tmp) or os.path.getsize(tmp) == 0:
+        print(f"  ERROR: merged zsig is empty -- aborting", file=sys.stderr)
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        return 0, 0
+
+    shutil.move(tmp, base_path)
+    os.unlink(absorb_path)
+
+    # Count actual function entries via strings(1) -- z~? overcounts SDB record lines
+    import subprocess as _sp
+    result = _sp.run(["strings", base_path], capture_output=True, text=True)
+    merged_count = sum(1 for l in result.stdout.splitlines() if l.startswith("zign|"))
+
+    # Update index
+    if absorb_key in index:
+        del index[absorb_key]
+    if base_key in index:
+        index[base_key]["entry_count"] = merged_count
+        combined = list(dict.fromkeys(
+            index[base_key].get("sample_names", []) + absorb_entries[:3]
+        ))[:5]
+        index[base_key]["sample_names"] = combined
+        index[base_key]["note"] = (
+            index[base_key].get("note", "") +
+            f" | merged absorb key {absorb_key} ({len(absorb_entries)} sigs)"
+        )
+
+    return merged_count, len(absorb_entries)
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -153,6 +226,9 @@ def main():
                     help="Show what would change without modifying files")
     ap.add_argument("--all",       action="store_true",
                     help="Prune ALL sessions regardless of threshold (use carefully)")
+    ap.add_argument("--merge",     nargs="+", metavar="BASE:ABSORB", default=None,
+                    help="Merge pairs: BASE absorbs ABSORB, ABSORB is deleted. "
+                         "Repeat for multiple pairs, e.g. --merge A:B C:D")
     args = ap.parse_args()
 
     # Allow --r2dir to override the module-level R2DIR / SESSIONS_DIR / INDEX_PATH
@@ -168,6 +244,37 @@ def main():
     with open(INDEX_PATH) as fh:
         index = json.load(fh)
 
+    # ── merge mode ─────────────────────────────────────────────────────
+    if args.merge:
+        pairs = []
+        for spec in args.merge:
+            if ':' not in spec:
+                sys.exit(f"ERROR: --merge expects BASE:ABSORB pairs, got {spec!r}")
+            base_k, absorb_k = spec.split(':', 1)
+            pairs.append((base_k.strip(), absorb_k.strip()))
+
+        ok = True
+        for base_k, absorb_k in pairs:
+            for k in (base_k, absorb_k):
+                if k not in index:
+                    print(f"WARNING: key {k!r} not in index.json", file=sys.stderr)
+            merged, absorbed = merge_zsig_pair(
+                base_k, absorb_k, SESSIONS_DIR, index, dry_run=args.dry_run)
+            if merged == 0 and absorbed == 0:
+                print(f"  FAILED: {base_k} <- {absorb_k}")
+                ok = False
+            else:
+                print(f"  {'[dry-run] ' if args.dry_run else ''}merged: "
+                      f"{base_k} <- {absorb_k}  ({merged} sigs, absorbed {absorbed})")
+
+        if not args.dry_run and ok:
+            with open(INDEX_PATH, 'w') as fh:
+                json.dump(index, fh, indent=2, sort_keys=True)
+                fh.write('\n')
+            print(f"\nindex.json updated ({len(pairs)} pair(s) merged).")
+        return
+
+    # ── prune mode (default) ─────────────────────────────────────────────
     # Determine which keys to process
     if args.keys:
         targets = {k: index[k] for k in args.keys if k in index}

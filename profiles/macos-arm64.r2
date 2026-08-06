@@ -41,9 +41,32 @@ to libc/signal.h
 to freebsd/freebsd.h
 
 # ── Signatures ───────────────────────────────────────────────────────────────
-# debian/arm64 libc6 provides partial coverage for standard libc functions.
-# TODO: generate macos-arm64 zsig from macOS SDK when available
+# No native macOS zsigs yet (requires macOS SDK or Apple host).
+# Third-party libs compiled from identical source -- high cross-OS match rate.
+# Intentionally excluded: libstdc++ (macOS uses libc++ ABI).
+# TODO: replace with native macOS zsigs when macOS SDK becomes available.
 zo debian/arm64/libc6.zsig
+zo debian/arm64/libgcc.zsig
+zo debian/arm64/libssl.zsig
+zo debian/arm64/libcrypto-static.zsig
+zo debian/arm64/zlib.zsig
+zo debian/arm64/libbz2.zsig
+zo debian/arm64/liblzma.zsig
+zo debian/arm64/libbrotli.zsig
+zo debian/arm64/libmbedtls.zsig
+zo debian/arm64/libcurl.zsig
+zo debian/arm64/libevent.zsig
+zo debian/arm64/libgnutls.zsig
+zo debian/arm64/libprotobuf.zsig
+zo debian/arm64/libsodium.zsig
+zo debian/arm64/libsqlite3.zsig
+zo debian/arm64/libxml2.zsig
+zo debian/arm64/libzstd.zsig
+zo debian/arm64/liblz4.zsig
+zo debian/arm64/libsnappy.zsig
+zo debian/arm64/libpcre2.zsig
+zo debian/arm64/libavformat.zsig
+zo debian/arm64/libavutil.zsig
 
 # ── Visual settings ──────────────────────────────────────────────────────────
 e asm.describe=true

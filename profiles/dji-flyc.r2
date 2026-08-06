@@ -38,9 +38,11 @@ e zign.minsz=4
 # Load DJI magic signatures  
 /m /root/.local/share/radare2/magic/firmware.magic
 
-# zsigs: NOT applicable for FlyC (STM32F4 bare-metal Cortex-M4).
-# DJI Android SDK zsigs target Linux/Android ARM32 and will produce false
-# positives against Cortex-M Thumb code. Use address-based symbols below.
+# zsigs: FreeRTOS RTOS kernel (CM4 port) + Newlib bare-metal libc
+# These name vTaskDelay, xQueueCreate, pvPortMalloc, xTimerCreate, etc.
+zo embedded/arm-none-eabi/freertos-cm4.zsig
+zo embedded/arm-none-eabi/newlib-v7em.zsig
+zo embedded/arm-none-eabi/newlib-libm-v7em.zsig
 
 
 # Load FlyC function signatures (uncomment matching version)

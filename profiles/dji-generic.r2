@@ -26,6 +26,15 @@ e zign.minsz=4
 e dir.types=~/.local/share/radare2/types
 to dji/dji-common.h
 to dji/dji-structs.h
+to libc/functions.h
+to embedded/arm-none-eabi/cortex-m.h
+
+# FreeRTOS RTOS kernel + Newlib libc zsigs for bare-metal Cortex-M targets.
+# Covers CM0/M0+ (ARMv6-M) and CM7 (ARMv7E-M) which lack dedicated profiles.
+# CM3 and CM4 are handled by dji-gimbal.r2 and dji-flyc.r2 respectively.
+zo embedded/arm-none-eabi/freertos-cm0.zsig
+zo embedded/arm-none-eabi/newlib-v6m.zsig
+zo embedded/arm-none-eabi/freertos-cm7.zsig
 
 # Load firmware format struct definitions (pf.dji_imah_header, pf.dji_dupc55_full, etc.)
 . /root/.local/share/radare2/format/firmware.pf

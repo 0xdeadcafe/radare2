@@ -38,10 +38,10 @@ e zign.minsz=4
 # Load DJI magic signatures
 /m /root/.local/share/radare2/magic/firmware.magic
 
-# DJI SDK cross-module signatures (sourced from Android ARM32 builds).
-# Lightbridge MCU shares RTOS wrappers and comms protocol code with Android SDK.
-# zo dji/DJIDevice.zsig
-# zo dji/DJIUavService.zsig
+# DJI SDK cross-module signatures.
+# FreeRTOS CM3 + Newlib zsigs name RTOS kernel and libc functions.
+zo embedded/arm-none-eabi/freertos-cm3.zsig
+zo embedded/arm-none-eabi/newlib-v7m.zsig
 
 
 # Load Lightbridge symbols (uncomment matching version)

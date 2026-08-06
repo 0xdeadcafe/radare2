@@ -51,6 +51,7 @@ zo debian/arm64/libc6.zsig
 zo debian/arm64/libgcc.zsig
 zo debian/arm64/libstdc++.zsig
 zo debian/arm64/libssl.zsig
+zo debian/arm64/libcrypto-static.zsig
 zo debian/arm64/zlib.zsig
 zo debian/arm64/libbz2.zsig
 zo debian/arm64/liblzma.zsig
@@ -59,6 +60,7 @@ zo debian/arm64/libmbedtls.zsig
 zo debian/arm64/libcurl.zsig
 zo debian/arm64/libevent.zsig
 zo debian/arm64/libgnutls.zsig
+zo debian/arm64/libprotobuf.zsig
 zo debian/arm64/libsodium.zsig
 zo debian/arm64/libsqlite3.zsig
 zo debian/arm64/libxml2.zsig

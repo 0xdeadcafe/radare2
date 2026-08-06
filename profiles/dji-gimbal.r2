@@ -41,9 +41,9 @@ e zign.minsz=4
 
 # DJI SDK cross-module signatures.
 # Gimbal MCU is bare-metal Cortex-M3 — DJI Android zsigs do not apply here.
-# For Ambarella-hosted gimbal targets, uncomment the lines below.
-# zo dji/DJIDevice.zsig
-# zo dji/DJIUavService.zsig
+# FreeRTOS CM3 + Newlib zsigs name RTOS kernel and libc functions.
+zo embedded/arm-none-eabi/freertos-cm3.zsig
+zo embedded/arm-none-eabi/newlib-v7m.zsig
 
 
 # Load gimbal symbols (uncomment matching version)

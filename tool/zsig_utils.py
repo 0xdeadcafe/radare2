@@ -134,7 +134,11 @@ def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
 
 
 def extract_objects_from_archive(archive_path: str, work_dir: str) -> list[str]:
-    """Extract .o/.lo files from a static archive (.a file).
+    """Extract .o/.lo/.os files from a static archive (.a file).
+
+    .os = Position-Independent Code (PIC) objects, used by uClibc-ng and
+    some other embedded toolchains (e.g. Bootlin AArch64 uclibc sysroots).
+    These are functionally identical to .o files for signature generation.
     
     Args:
         archive_path: Path to the .a archive file
@@ -148,7 +152,8 @@ def extract_objects_from_archive(archive_path: str, work_dir: str) -> list[str]:
         return []
     
     members = result.stdout.decode().strip().split('\n')
-    object_files = [m for m in members if m.endswith('.o') or m.endswith('.lo')]
+    object_files = [m for m in members
+                    if m.endswith('.o') or m.endswith('.lo') or m.endswith('.os')]
     
     if not object_files:
         return []

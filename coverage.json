@@ -17,7 +17,7 @@
   },
   "aarch64-glibc-generic": {
     "arch": "aarch64",
-    "note": "linux-glibc-arm64.r2; debian/arm64 zsigs (13 libs); full POSIX + OpenSSL + FFmpeg types",
+    "note": "linux-glibc-arm64.r2; debian/arm64 zsigs (23 libs); full POSIX + OpenSSL + FFmpeg types",
     "profile": true,
     "vendor": "generic",
     "zsigs": true
@@ -52,6 +52,13 @@
     "vendor": "spacex",
     "zsigs": true
   },
+  "aarch64-uclibc-openwrt": {
+    "arch": "aarch64",
+    "note": "uclibc/arm64/uclibc-libc.zsig (1961 sigs, Bootlin 2024.02-1); libc/uclibc-arm64.r2; arm/64/uclibc wired",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
   "amd64-go": {
     "arch": "x86-64",
     "note": "linux-go-amd64.r2 + go/amd64/go1.23-stdlib.zsig (87% named, 3022 sigs); go/runtime.h types",
@@ -80,9 +87,23 @@
     "vendor": "generic",
     "zsigs": true
   },
+  "android-x86": {
+    "arch": "x86 (32-bit)",
+    "note": "android-x86.r2; NDK r27c x86 zsig; Android emulator/Chromebook x86",
+    "profile": true,
+    "vendor": "android",
+    "zsigs": true
+  },
+  "android-x86_64": {
+    "arch": "x86-64",
+    "note": "android-x86_64.r2; NDK r27c x86_64 zsig; Android emulator/Chromebook x86_64",
+    "profile": true,
+    "vendor": "android",
+    "zsigs": true
+  },
   "arm-cobham": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "glibc ARM32; cobham-sailor-arm.r2 \u2014 glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig) (armhf apt unavailable in Docker)",
+    "note": "glibc ARM32; cobham-sailor-arm.r2 \u2014 glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig) (armhf apt unavailable in Docker) | debian/armhf full zsig set now loaded",
     "profile": true,
     "symbols": false,
     "vendor": "cobham",
@@ -97,7 +118,7 @@
   },
   "arm-furuno": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "furuno-felcom-arm.r2 created; glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig)",
+    "note": "furuno-felcom-arm.r2 created; glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig) | debian/armhf full zsig set now loaded",
     "profile": true,
     "symbols": true,
     "vendor": "furuno",
@@ -105,14 +126,14 @@
   },
   "arm-glibc-generic": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "linux-glibc-arm32.r2 + glibc/armhf/glibc-libc.zsig; default arch profile for ARM32 glibc",
+    "note": "linux-glibc-arm32.r2 + debian/armhf/ full set (23 zsigs, Ubuntu 22.04); glibc/armhf/glibc-libc.zsig removed (superseded by debian/armhf/)",
     "profile": true,
     "vendor": "generic",
     "zsigs": true
   },
   "arm-intellian": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "intellian-arm-glibc.r2; glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig)",
+    "note": "intellian-arm-glibc.r2; glibc ARM32 zsig available (glibc/armhf/glibc-libc.zsig) | debian/armhf full zsig set now loaded",
     "profile": true,
     "symbols": false,
     "vendor": "intellian",
@@ -120,8 +141,8 @@
   },
   "arm-jrc": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "JRC JUE-100GX uses intellian-arm-glibc.r2; symbols in symbols/jrc/",
-    "profile": false,
+    "note": "arm/32 default -> linux-glibc-arm32.r2; intellian-arm-glibc.r2 used when vendor=intellian/jrc; symbols in symbols/jrc/",
+    "profile": true,
     "symbols": true,
     "vendor": "jrc",
     "zsigs": false
@@ -135,24 +156,24 @@
   },
   "arm-navico": {
     "arch": "arm",
-    "note": "Navico/Simrad Zeus; no dedicated profile; use linux-musl-arm64.r2 or android-arm32.r2 depending on binary",
-    "profile": false,
+    "note": "arm/32 default -> linux-glibc-arm32.r2; no dedicated vendor profile; symbols in symbols/navico/",
+    "profile": true,
     "symbols": true,
     "vendor": "navico",
     "zsigs": false
   },
   "arm-netgear": {
     "arch": "arm",
-    "note": "no dedicated profile; use linux-musl-arm64.r2 or android-arm32.r2 depending on firmware",
-    "profile": false,
+    "note": "arm/32 default -> linux-glibc-arm32.r2; no dedicated vendor profile; symbols in symbols/netgear/",
+    "profile": true,
     "symbols": true,
     "vendor": "netgear",
     "zsigs": true
   },
   "arm-raymarine": {
     "arch": "arm",
-    "note": "no dedicated profile; symbols in symbols/raymarine/",
-    "profile": false,
+    "note": "arm/32 default -> linux-glibc-arm32.r2; no dedicated vendor profile; symbols in symbols/raymarine/",
+    "profile": true,
     "symbols": true,
     "vendor": "raymarine",
     "zsigs": false
@@ -167,23 +188,23 @@
   },
   "arm-tp-link": {
     "arch": "ARM 32-bit",
-    "note": "no dedicated profile; use linux-uclibc-mips.r2 or openwrt-mips*.r2",
-    "profile": false,
+    "note": "arm/32 default -> linux-glibc-arm32.r2; uclibc override via libc_profiles; no dedicated vendor profile",
+    "profile": true,
     "symbols": false,
     "vendor": "tp-link",
     "zsigs": true
   },
   "arm-unknown": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "use android-arm32.r2 or linux-musl-arm64.r2 as appropriate",
-    "profile": false,
+    "note": "arm/32 default -> linux-glibc-arm32.r2; libc override applied via interpreter detection",
+    "profile": true,
     "symbols": false,
     "vendor": "unknown",
     "zsigs": true
   },
   "arm-viasat": {
     "arch": "arm (little endian, 32-bit)",
-    "note": "viasat-explorer-gx-arm.r2 created; no dedicated zsigs",
+    "note": "viasat-explorer-gx-arm.r2 created; no dedicated zsigs | debian/armhf full zsig set now loaded",
     "profile": true,
     "symbols": false,
     "vendor": "viasat",
@@ -207,6 +228,13 @@
   "arm32-uclibc-linux": {
     "arch": "arm (little endian, 32-bit)",
     "note": "linux-uclibc-arm32.r2 top-level profile; uclibc/arm32/uclibc-libc.zsig (3269 sigs); ARM926EJ-S + ARMv7 soft-float",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "go-x86-linux": {
+    "arch": "x86 (32-bit)",
+    "note": "linux-go-x86.r2; go/x86/go1.23-stdlib.zsig; 32-bit Linux Go binaries",
     "profile": true,
     "vendor": "generic",
     "zsigs": true
@@ -288,6 +316,13 @@
   "x86-glibc-x64": {
     "arch": "x86-64",
     "note": "libc/glibc-x64.r2 loaded as libc layer; 13 debian/amd64 zsigs (libc6, libssl, zlib, curl, etc.)",
+    "profile": true,
+    "vendor": "generic",
+    "zsigs": true
+  },
+  "x86-linux-i386": {
+    "arch": "x86 (i386 32-bit)",
+    "note": "linux-glibc-x86.r2 + debian/i386/ full set (22 zsigs excl. libmbedtls, Ubuntu 22.04)",
     "profile": true,
     "vendor": "generic",
     "zsigs": true

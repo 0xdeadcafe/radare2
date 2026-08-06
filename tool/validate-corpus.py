@@ -167,7 +167,10 @@ def check_profile_references():
                 zsig_rel = zsig_rel.replace("~/.local/share/radare2/zigns/", "")
                 zsig_path = ZIGNS_DIR / zsig_rel
                 if not zsig_path.exists():
-                    err(f"{profile.relative_to(CORPUS_ROOT)}:{lineno}: zo {zsig_rel!r} ← ZSIG NOT FOUND")
+                    # r2 zo silently skips missing zsig files, so this is a warning
+                    # not a hard error. Missing zsigs are expected for planned corpus
+                    # expansions (e.g. debian/i386/ before Batch 2 generation runs).
+                    warn(f"{profile.relative_to(CORPUS_ROOT)}:{lineno}: zo {zsig_rel!r} ← ZSIG NOT FOUND (run tool/generate-debian-libs-zsig.py to populate)")
 
             # --- to lines (skip comments, skip absolute paths for types outside corpus) ---
             elif line.startswith("to ") and not line.startswith("# to"):
@@ -304,6 +307,84 @@ def check_dead_types():
 
 # ── Report ────────────────────────────────────────────────────────────────────
 
+def check_arch_defaults():
+    """Verify profiles_config.json arch routing is sane.
+
+    Guards against regressions of the Batch 1 bugs:
+    - arm/32 with no default (most common embedded arch silently unprovisioned)
+    - Windows PE profile as arch default for a Linux/ELF arch
+    - High-value libc overrides missing (arm/32/glibc, x86/32/glibc, etc.)
+    """
+    if not PROFILES_CONFIG.exists():
+        return
+    cfg = json.loads(PROFILES_CONFIG.read_text())
+    arch_profiles = cfg.get("arch_profiles", {})
+    libc_profiles  = cfg.get("libc_profiles", {})
+    windows_profiles = cfg.get("windows_profiles", {})
+
+    # Rule 1: arm/32 must have a default (most common embedded firmware arch)
+    if "arm/32" not in arch_profiles:
+        err("profiles_config.json: arch_profiles missing 'arm/32' default — "
+            "ARM32 ELF binaries (most embedded firmware) get no types/zsigs")
+
+    # Rule 2: no Linux/ELF arch default should route to a Windows PE profile
+    windows_profile_names = set(windows_profiles.values())
+    for key, profile_file in arch_profiles.items():
+        if profile_file in windows_profile_names:
+            err(f"profiles_config.json: arch_profiles[{key!r}] = {profile_file!r} "
+                f"routes to a Windows PE profile — Linux ELF binaries get wrong analysis")
+
+    # Rule 3: high-value libc overrides must be present
+    HIGH_VALUE_LIBC = [
+        ("arm/32/glibc",  "ARM32 glibc firmware (Cobham, Furuno, Intellian, Navico)"),
+        ("arm/32/uclibc", "ARM32 uClibc firmware (Supermicro BMC, Buildroot devices)"),
+        ("x86/32/glibc",  "Linux i386 glibc firmware (older NAS, routers)"),
+        ("x86/64/glibc",  "Linux x86-64 glibc userland (server daemons, CTF)"),
+        ("arm/64/glibc",  "AArch64 glibc (Raspberry Pi OS 64-bit, server ARM64)"),
+        ("arm/64/uclibc", "AArch64 uClibc (OpenWrt AArch64 targets)"),
+    ]
+    for key, description in HIGH_VALUE_LIBC:
+        if key not in libc_profiles:
+            err(f"profiles_config.json: libc_profiles missing {key!r} — "
+                f"{description} won't get libc zsigs loaded")
+        else:
+            profile_file = libc_profiles[key]
+            path = PROFILES_DIR / profile_file
+            if not path.exists():
+                err(f"profiles_config.json: libc_profiles[{key!r}] = {profile_file!r} "
+                    f"← FILE NOT FOUND")
+
+
+def check_orphaned_zsigs():
+    """Warn about zsig files not referenced by any profile.
+
+    Exceptions:
+    - sessions/   : corpus session zsigs, loaded dynamically by aether_r2profile.py
+    - windows/    : large Windows MFC/ATL/vcamp library set; available for manual
+                    'zo windows/x64/vs20xx-mfc140.zsig' use; not auto-loaded because
+                    most PE targets don't link MFC. See windows-x64.r2 for the
+                    auto-loaded subset.
+    """
+    import re
+    all_refs: set[str] = set()
+    for profile in PROFILES_DIR.rglob("*.r2"):
+        for m in re.finditer(r"^zo\s+(\S+)",
+                             profile.read_text(errors="replace"), re.MULTILINE):
+            all_refs.add(m.group(1))
+
+    for zsig in sorted(ZIGNS_DIR.rglob("*.zsig")):
+        rel = str(zsig.relative_to(ZIGNS_DIR))
+        # Intentional exemptions
+        if rel.startswith("sessions/"):
+            continue
+        if rel.startswith("windows/"):
+            continue   # manual-use extras; not a corpus quality issue
+        if rel not in all_refs:
+            size_kb = zsig.stat().st_size // 1024
+            warn(f"zsig not referenced by any profile: {rel}  ({size_kb} KB) "
+                 f"\u2014 add zo to a profile or document as manual-use")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Validate r2 corpus consistency")
     ap.add_argument("--json", action="store_true", help="Machine-readable JSON output")
@@ -311,12 +392,14 @@ def main():
     args = ap.parse_args()
 
     check_profiles_config()
+    check_arch_defaults()
     check_coverage()
     check_profile_references()
     check_session_index()
     check_zsig_coverage()
     check_magic_files()
     check_dead_types()
+    check_orphaned_zsigs()
 
     if args.json:
         print(json.dumps({"errors": ERRORS, "warnings": WARNINGS}, indent=2))

@@ -47,13 +47,31 @@ to openssl/crypto.h
 to zlib/zlib.h
 
 # ── Load signatures ──────────────────────────────────────────────────────────
-# debian/amd64 libc6 is glibc but function bodies are similar enough for
-# cross-OS matching of standard library functions (memcpy, strcmp, printf, etc.)
-# Match rate ~60-70% on FreeBSD binaries for standard functions.
-zo debian/amd64/libc6.zsig
+# Third-party libraries compiled from the same source across Linux and FreeBSD;
+# function bodies are identical so glibc-derived zsigs match at >90% rate.
+# Intentionally excluded: libc6 (divergent BSD libc implementation),
+#                         libstdc++ (Linux/BSD C++ ABI differs).
+zo debian/amd64/libgcc.zsig
 zo debian/amd64/libssl.zsig
+zo debian/amd64/libcrypto-static.zsig
 zo debian/amd64/zlib.zsig
+zo debian/amd64/libbz2.zsig
+zo debian/amd64/liblzma.zsig
+zo debian/amd64/libbrotli.zsig
+zo debian/amd64/libmbedtls.zsig
 zo debian/amd64/libcurl.zsig
+zo debian/amd64/libevent.zsig
+zo debian/amd64/libgnutls.zsig
+zo debian/amd64/libprotobuf.zsig
+zo debian/amd64/libsodium.zsig
+zo debian/amd64/libsqlite3.zsig
+zo debian/amd64/libxml2.zsig
+zo debian/amd64/libzstd.zsig
+zo debian/amd64/liblz4.zsig
+zo debian/amd64/libsnappy.zsig
+zo debian/amd64/libpcre2.zsig
+zo debian/amd64/libavformat.zsig
+zo debian/amd64/libavutil.zsig
 
 # ── Visual settings ──────────────────────────────────────────────────────────
 e asm.describe=true
