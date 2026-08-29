@@ -39,10 +39,10 @@
   },
   "aarch64-macos": {
     "arch": "aarch64",
-    "note": "macos-arm64.r2; Apple Silicon Mach-O; PAC-aware; TODO: native macOS zsigs",
+    "note": "macos-arm64.r2; Apple Silicon Mach-O; PAC-aware; native zsigs: macos/arm64/libSystem.zsig + libm.zsig (Batch 5)",
     "profile": true,
     "vendor": "generic",
-    "zsigs": false
+    "zsigs": true
   },
   "aarch64-spacex": {
     "arch": "aarch64",
@@ -308,10 +308,10 @@
   },
   "x64-macos": {
     "arch": "x86-64",
-    "note": "macos-x64.r2; Mach-O; POSIX + BSD types; TODO: native macOS zsigs",
+    "note": "macos-x64.r2; Mach-O; POSIX + BSD types; native zsigs: macos/x86_64/libSystem.zsig + libm.zsig (Batch 5)",
     "profile": true,
     "vendor": "generic",
-    "zsigs": false
+    "zsigs": true
   },
   "x86-glibc-x64": {
     "arch": "x86-64",

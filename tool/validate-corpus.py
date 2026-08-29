@@ -230,7 +230,9 @@ def check_session_index():
                 warn(f"sessions/{key}: missing named_pct field in index.json")
             continue
         pct = entry.get("named_pct", 100)
-        if pct < 50:
+        if pct == 0:
+            pass   # explicitly zeroed = intentionally archived (all fcn.*, retained for index integrity)
+        elif pct < 50:
             warn(f"sessions/{key}.zsig: only {pct}% named functions (consider pruning fcn.* entries)")
         elif pct < 80:
             warn(f"sessions/{key}.zsig: {pct}% named functions (acceptable but pruning fcn.* would help)")

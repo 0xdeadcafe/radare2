@@ -1,0 +1,34 @@
+{
+  "_comment": "zsig tier taxonomy — consumed by skel/install.sh and scripts/check_r2_corpus.sh",
+  "_updated": "2026-08-28",
+
+  "core": {
+    "dirs": ["musl", "uclibc", "openwrt", "embedded", "glibc"],
+    "description": "Essential libc/platform signatures for embedded Linux analysis (~46 MB)",
+    "required": true,
+    "approx_mb": 46
+  },
+
+  "vendor": {
+    "dirs": ["android", "cisco-ios", "dji", "go", "juniper", "macos", "vxworks"],
+    "description": "Vendor and platform-specific signature collections (~96 MB)",
+    "required": false,
+    "approx_mb": 96
+  },
+
+  "debian-large": {
+    "dirs": ["debian"],
+    "description": "Full Ubuntu 22.04 library set — amd64/arm64/armhf/i386 (~347 MB)",
+    "required": false,
+    "approx_mb": 347
+  },
+
+  "windows-large": {
+    "dirs": ["windows"],
+    "description": "Full Windows SDK and VC++ runtime set (~349 MB)",
+    "required": false,
+    "approx_mb": 349
+  },
+
+  "_sessions_note": "sessions/ is always a local real directory (written during analysis). It is never symlinked and is not a tier here."
+}

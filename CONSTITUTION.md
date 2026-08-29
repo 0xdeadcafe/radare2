@@ -94,20 +94,31 @@ skel/.local/share/radare2/   (deployed to ~/.local/share/radare2/ by skel/instal
 ├── format/                # → ~/.local/share/radare2/format/
 ├── types/                 # → ~/.local/share/radare2/types/
 ├── zigns/                 # → ~/.local/share/radare2/zigns/
-│   ├── android/
-│   ├── debian/
-│   ├── embedded/
-│   ├── musl/
-│   ├── windows/
-│   └── sessions/
+│   ├── tiers.json           # tier taxonomy (core/vendor/debian-large/windows-large)
+│   ├── android/             # vendor tier
+│   ├── cisco-ios/           # vendor tier
+│   ├── debian/              # debian-large tier (amd64/arm64/armhf/i386)
+│   ├── dji/                 # vendor tier
+│   ├── embedded/            # core tier (FreeRTOS + Newlib Cortex-M)
+│   ├── go/                  # vendor tier
+│   ├── juniper/             # vendor tier
+│   ├── macos/               # vendor tier (libSystem + libm)
+│   ├── musl/                # core tier
+│   ├── openwrt/             # core tier
+│   ├── uclibc/              # core tier (mips32/64, arm32, arm64)
+│   ├── vxworks/             # vendor tier
+│   ├── windows/             # windows-large tier
+│   └── sessions/            # local only — written during analysis
 ├── profiles/              # → ~/.local/share/radare2/profiles/
-│   └── libc/            # libc sub-profiles (loaded by vendor profiles)
+│   ├── profiles_config.json # auto-profile routing schema
+│   └── libc/                # libc sub-profiles (sourced by vendor profiles)
 ├── scripts/               # → ~/.local/share/radare2/scripts/
-│   └── windows-sinks.r2 # PE security sink labeler (sourced by windows profiles)
+│   └── windows-sinks.r2     # PE security sink labeler (sourced by windows profiles)
 ├── symbols/               # → ~/.local/share/radare2/symbols/
 ├── plugins/               # → ~/.local/share/radare2/plugins/  (Modality plugin.py)
 ├── modality/              # → ~/.local/share/radare2/modality/  (angr/Z3 bridge source)
 ├── tool/                  # Content generators (run from repo, not installed)
 ├── coverage.json          # Arch/vendor coverage matrix
+├── TODO.md                # Open work items
 └── docs/                  # Protocol RE notes and workflow references
 ```

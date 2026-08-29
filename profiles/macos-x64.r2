@@ -41,10 +41,11 @@ to libc/signal.h
 to freebsd/freebsd.h
 
 # ── Signatures ───────────────────────────────────────────────────────────────
-# No native macOS zsigs yet (requires macOS SDK or Apple host).
-# Third-party libs compiled from identical source -- high cross-OS match rate.
-# Intentionally excluded: libstdc++ (macOS uses libc++ ABI).
-# TODO: replace with native macOS zsigs when macOS SDK becomes available.
+# Native macOS zsigs (compiled from Apple open source + SDK)
+zo macos/x86_64/libSystem.zsig
+zo macos/x86_64/libm.zsig
+# Third-party libs (statically linked OpenSSL, zlib, etc.)
+# compiled from identical source — high cross-OS match rate:
 zo debian/amd64/libc6.zsig
 zo debian/amd64/libgcc.zsig
 zo debian/amd64/libssl.zsig

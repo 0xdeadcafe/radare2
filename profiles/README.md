@@ -15,32 +15,27 @@ r2 -i ~/.local/share/radare2/profiles/linux-musl-arm64.r2 binary
 
 ## Profile Index
 
-### Windows PE
+### Linux / Embedded
 
 | Profile | Arch | Description |
 |---------|------|-------------|
-| `windows-x64.r2` | x86-64 | Windows PE x64 — loads VS2015–2022 vcruntime140, ucrtbase, msvcp140 zsigs |
-| `windows-x86.r2` | x86 | Windows PE x86 — same runtimes, 32-bit |
-| `windows-arm64.r2` | AArch64 | Windows PE ARM64 — VS2019/VS2022 vcruntime140, msvcp140 zsigs |
-
-### Android Native
-
-| Profile | Arch | Description |
-|---------|------|-------------|
-| `android-arm64.r2` | arm64-v8a | Android native lib/exe with NDK r27c bionic zsigs |
-| `android-arm32.r2` | armeabi-v7a | 32-bit Android native with NDK r27c zsigs |
-
-### Linux
-
-| Profile | Arch | Description |
-|---------|------|-------------|
-| `linux-musl-x64.r2` | x86-64 | Linux/Alpine musl-libc — loads musl zsig + types |
+| `linux-musl-x64.r2` | x86-64 | Linux musl — loads musl x86-64 zsig + types |
 | `linux-musl-x86.r2` | x86 | Linux musl x86 32-bit |
-| `linux-musl-arm64.r2` | aarch64 | Linux/Alpine musl-libc for ARM64 |
+| `linux-musl-arm64.r2` | AArch64 | Linux musl ARM64 |
 | `linux-musl-arm32.r2` | ARM32 | Linux musl ARM32 hard-float (Cortex-A) |
 | `linux-musl-armv7.r2` | ARMv7 | Linux musl ARMv7 (armv7l, Thumb-2) |
-| `linux-glibc-arm32.r2` | ARM32 | Linux glibc ARM32 hard-float (Linaro toolchain) |
+| `linux-musl-ppc64le.r2` | PPC64LE | Linux musl PPC64 little-endian |
+| `linux-musl-riscv64.r2` | RISC-V 64 | Linux musl RISC-V 64-bit |
+| `linux-musl-s390x.r2` | s390x | Linux musl IBM z/Architecture |
+| `linux-glibc-x64.r2` | x86-64 | Linux glibc x86-64 — Debian/Ubuntu/RHEL, server daemons, CTF |
+| `linux-glibc-arm64.r2` | AArch64 | Linux glibc ARM64 — Raspberry Pi OS 64-bit, server ARM64 |
+| `linux-glibc-arm32.r2` | ARM32 | Linux glibc ARM32 — Cobham, Furuno, Intellian, Navico |
+| `linux-glibc-x86.r2` | x86 | Linux glibc i386 — older NAS/router firmware, CTF |
 | `linux-uclibc-mips.r2` | MIPS32 BE | Embedded Linux uClibc — generic MIPS big-endian |
+| `linux-uclibc-arm32.r2` | ARM32 | Embedded Linux uClibc ARM32 — Supermicro BMC, Buildroot |
+| `linux-go-amd64.r2` | x86-64 | Go binaries (amd64) — loads go/amd64 stdlib zsig |
+| `linux-go-arm64.r2` | AArch64 | Go binaries (arm64) — loads go/arm64 stdlib zsig |
+| `linux-go-x86.r2` | x86 | Go binaries (x86) — loads go/x86 stdlib zsig |
 | `mips-plt-resolve.r2` | MIPS32 | PLT→GOT resolver helper for stripped MIPS binaries |
 
 ### OpenWrt Router Firmware
@@ -52,6 +47,36 @@ r2 -i ~/.local/share/radare2/profiles/linux-musl-arm64.r2 binary
 | `openwrt-mipsel_mips32.r2` | MIPSel MIPS32r1 | Broadcom BCM47xx — Linksys WRT54G, Netgear WGR614 |
 | `openwrt-mips_mips32.r2` | MIPS MIPS32r1 | BCM63xx DSL — Livebox 2, BT HH3 |
 | `openwrt-mips64_octeonplus.r2` | MIPS64 OcteonPlus | Ubiquiti EdgeRouter Lite/4, Cavium Octeon |
+
+### Windows PE
+
+| Profile | Arch | Description |
+|---------|------|-------------|
+| `windows-x64.r2` | x86-64 | Windows PE x64 — loads VS2015–2022 vcruntime140, ucrtbase, msvcp140 zsigs |
+| `windows-x86.r2` | x86 | Windows PE x86 — same runtimes, 32-bit |
+| `windows-arm64.r2` | AArch64 | Windows PE ARM64 — VS2019/VS2022 vcruntime140, msvcp140 zsigs |
+
+### macOS
+
+| Profile | Arch | Description |
+|---------|------|-------------|
+| `macos-arm64.r2` | AArch64 | macOS Apple Silicon (M1/M2/M3) Mach-O — native libSystem + libm zsigs |
+| `macos-x64.r2` | x86-64 | macOS Intel Mach-O — native libSystem + libm zsigs |
+
+### Android Native
+
+| Profile | Arch | Description |
+|---------|------|-------------|
+| `android-arm64.r2` | arm64-v8a | Android native lib/exe with NDK r27c bionic zsigs |
+| `android-arm32.r2` | armeabi-v7a | 32-bit Android native with NDK r27c zsigs |
+| `android-x86_64.r2` | x86-64 | Android x86-64 (emulator / Chromebook) |
+| `android-x86.r2` | x86 | Android x86 (emulator) |
+
+### FreeBSD
+
+| Profile | Arch | Description |
+|---------|------|-------------|
+| `freebsd-x64.r2` | x86-64 | FreeBSD x86-64 (JunOS userland, pfSense, TrueNAS) — loads BSD types |
 
 ### Cisco IOS
 
@@ -81,7 +106,7 @@ r2 -i ~/.local/share/radare2/profiles/linux-musl-arm64.r2 binary
 
 | Profile | Arch | Description |
 |---------|------|-------------|
-| `vxworks7-x86_64.r2` | x86-64 | VxWorks 7 kernel image (Intel BSP, locore@0x408000) — loads VxWorks 7 zsigs |
+| `vxworks7-x86_64.r2` | x86-64 | VxWorks 7 kernel image (Intel BSP, locore@0x408000) |
 | `icom-vxworks-mips.r2` | MIPS32 BE | Icom VxWorks MIPS — generic VxWorks MIPS firmware |
 | `icom-ap90m-vxworks.r2` | MIPS32 BE | Icom AP-90M (FIRM container, VxWorks 6.9 MIPS32 BE) |
 
@@ -89,41 +114,43 @@ r2 -i ~/.local/share/radare2/profiles/linux-musl-arm64.r2 binary
 
 | Profile | Arch | Description |
 |---------|------|-------------|
-| `cobham-sailor-arm.r2` | ARM32 LE | Cobham SAILOR GX / Explorer (ACU acu_ctl, acu_vmu, suu) — loads tt_cshell types |
+| `cobham-sailor-arm.r2` | ARM32 LE | Cobham SAILOR GX / Explorer (ACU acu_ctl, acu_vmu, suu) |
 | `cobham-e710-api.r2` | ARM32 LE | Cobham Explorer 710 API service |
 | `cobham-e710-pam.r2` | ARM32 LE | Cobham Explorer 710 PAM daemon |
 | `cobham-e500-mips.r2` | MIPS32 | Cobham Explorer 500 (older MIPS platform) |
 | `viasat-explorer-gx-arm.r2` | ARM32 LE | Viasat / Cobham Explorer GX family |
-| `intellian-arm-glibc.r2` | ARM32 LE | Intellian iARM-GX / iARM-nx (JRC JUE-100GX, Viasat GX) — nxagent.cgi, acu_server, libcommon.so |
+| `intellian-arm-glibc.r2` | ARM32 LE | Intellian iARM-GX / iARM-nx — nxagent.cgi, acu_server |
 | `furuno-felcom-arm.r2` | ARM32 LE | Furuno FELCOM maritime SATCOM terminal |
 
 ### SpaceX Starlink
 
 | Profile | Arch | Description |
 |---------|------|-------------|
-| `spacex-starlink-musl-arm64.r2` | AArch64 | Starlink catson/catapult user terminal — musl ARM64, loads Starlink zsigs + proto fingerprints |
+| `spacex-starlink-musl-arm64.r2` | AArch64 | Starlink catson/catapult — musl ARM64, proto fingerprints |
 
 ### Network Appliances
 
 | Profile | Arch | Description |
 |---------|------|-------------|
-| `juniper-srx.r2` | x86-64 / MIPS64 | Juniper SRX JunOS — loads JunOS kmd zsigs + DVPN types |
-| `supermicro-bmc-arm.r2` | ARM32 | Supermicro BMC (B2SC1-CPU) — ipmi.cgi, url_redirect.cgi, CGI tag dispatch |
+| `juniper-srx.r2` | x86-64 / MIPS64 | Juniper SRX JunOS — kmd zsigs + DVPN types |
+| `juniper-ppc32.r2` | PPC32 BE | Juniper PPC32 family (`f5e1d8fb`) — kmd, dhcpd, HTTPD-GK |
+| `supermicro-bmc-arm.r2` | ARM32 | Supermicro BMC — ipmi.cgi, url_redirect.cgi, CGI tag dispatch |
 | `hpe-ilo7-arm64.r2` | AArch64 | HPE iLO 7 BMC ARM64 |
-| `bosch-cpp3.r2` | ARM32 LE | Bosch VIP X CPP3 — ARM32 statically linked RTOS modules (arm.app1, webservice.dll, rtsp.dll) |
-| `bosch-cppenc.r2` | ARM32 Thumb | Bosch VIP X CPP-ENC — ARM Thumb-2 raw flat binary (base 0x80000000; container key 0x42) |
-| `netgear-orbi-cgi.r2` | ARM32 Thumb | NETGEAR Orbi RBR50 net-cgi — ARM32 Thumb PIE .so; musl zsigs; r2 base=0x0, angr base=0x400000 |
+| `bosch-cpp3.r2` | ARM32 LE | Bosch VIP X CPP3 — ARM32 statically linked RTOS modules |
+| `bosch-cppenc.r2` | ARM32 Thumb | Bosch VIP X CPP-ENC — ARM Thumb-2 raw flat binary |
+| `netgear-orbi-cgi.r2` | ARM32 Thumb | NETGEAR Orbi RBR50 net-cgi |
 | `autel-aarch64.r2` | AArch64 | Autel EVO 2 — AArch64 Linux (transmit, UpgradeService) |
 
-### libc Sub-profiles (shared by vendor profiles)
+### libc Sub-profiles (sourced by vendor profiles, not loaded directly)
 
-Located in `libc/` — these are included by the above profiles, not loaded directly:
+Located in `libc/`:
 
 | File | Contents |
 |------|---------|
-| `libc/glibc-arm32.r2` | glibc ARM32 zsigs |
-| `libc/glibc-arm64.r2` | glibc ARM64 zsigs |
-| `libc/glibc-x64.r2` | glibc x86-64 zsigs |
+| `libc/glibc-arm32.r2` | glibc ARM32 zsigs (debian/armhf/) |
+| `libc/glibc-arm64.r2` | glibc ARM64 zsigs (debian/arm64/) |
+| `libc/glibc-x64.r2` | glibc x86-64 zsigs (debian/amd64/) |
+| `libc/glibc-x86.r2` | glibc i386 zsigs (debian/i386/) |
 | `libc/bionic-arm32.r2` | Android Bionic ARM32 |
 | `libc/bionic-arm64.r2` | Android Bionic ARM64 |
 | `libc/musl-arm32.r2` | musl ARM32 |
@@ -132,10 +159,43 @@ Located in `libc/` — these are included by the above profiles, not loaded dire
 | `libc/musl-mips32-le.r2` | musl MIPS32 LE |
 | `libc/musl-x64.r2` | musl x86-64 |
 | `libc/musl-x86.r2` | musl x86 |
-| `libc/uclibc-arm32.r2` | uClibc ARM32 |
+| `libc/uclibc-arm32.r2` | uClibc ARM32 (Bootlin armv5-eabi) |
+| `libc/uclibc-arm64.r2` | uClibc ARM64 (Bootlin aarch64 uclibc-ng) |
 | `libc/uclibc-mips32.r2` | uClibc MIPS32 BE |
 | `libc/uclibc-mips64.r2` | uClibc MIPS64 |
 | `libc/uclibc-mips64-n32.r2` | uClibc MIPS64 N32 ABI |
+
+---
+
+## Auto-Profile Routing (`profiles_config.json`)
+
+`aether_r2profile.py` reads `profiles_config.json` to automatically select
+a profile based on ELF/PE metadata. The config has four sections:
+
+```json
+{
+  "arch_profiles":    { "arm/32": "linux-glibc-arm32.r2", "x86/32": "linux-glibc-x86.r2", ... },
+  "windows_profiles": { "x86/32": "windows-x86.r2", "x86/64": "windows-x64.r2", ... },
+  "vendor_profiles":  { "arm/32/cobham": "cobham-sailor-arm.r2", ... },
+  "libc_profiles":    { "arm/32/glibc": "libc/glibc-arm32.r2", "arm/64/uclibc": "libc/uclibc-arm64.r2", ... }
+}
+```
+
+Selection priority (highest wins):
+1. **`vendor_profiles`** — keyed by `arch/bits/vendor` (e.g. `arm/32/cobham`)
+2. **`windows_profiles`** — keyed by `arch/bits`; used when `bin.os == windows`
+3. **`libc_profiles`** — keyed by `arch/bits/libc`; overrides arch default when ELF interpreter is detected
+4. **`arch_profiles`** — keyed by `arch/bits`; catch-all default
+
+To add a new vendor profile, add an entry to `profiles_config.json`:
+```json
+"vendor_profiles": {
+  "arm/64/my-vendor": "my-vendor-arm64.r2"
+}
+```
+No Python changes needed — `aether_r2profile.py` reads the JSON at runtime.
+
+---
 
 ## What Each Profile Configures
 
@@ -187,16 +247,3 @@ Adjust:
 - `to` lines to load matching type headers
 - Add vendor-specific `f sym.*` flags from previous sessions
 - Add `echo` lines summarising attack surface
-
-## Auto-Selection via `aether_r2profile.py`
-
-The `scripts/aether_r2profile.py` script maps `(arch, bits, vendor)` tuples to
-profiles automatically during AETHER binary triage. It loads:
-- the arch/vendor profile
-- the matching libc sub-profile when the ELF interpreter identifies musl/uClibc/glibc/bionic
-- session zsigs from the shared corpus
-
-It also performs arch-specific PLT resolution where needed (for example AArch64
-and MIPS helper flows). Signature application/matching behavior should be treated
-as workflow-dependent; do not assume every loader path automatically performs a
-manual-equivalent `z/`.

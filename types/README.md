@@ -63,7 +63,7 @@ tp sockaddr_in @ 0x1234
 | `juniper/` | Juniper SRX (JunOS) | `dvpn_sa_entry_t`, `dvpn_token_entry_t` — DVPN token table (HTTPD-GK analysis) — see `juniper/README.md` |
 | `supermicro/` | Supermicro BMC (B2SC1-CPU) | `tag_dispatch_entry`, IPMI session struct, CGI env getters, `cgiGetPostVariable` |
 | `spacex/` | SpaceX Starlink (catson/catapult) | `UserClass` enum, BwpProxy command types, unlock service key structs — see `spacex/README.md` |
-| `embedded/arm-none-eabi/` | Cortex-M (newlib libc) | **Not present yet in `types/`; see note below** |
+| `embedded/arm-none-eabi/` | Cortex-M (newlib libc) | NVIC, SCB, SysTick, MPU, DWT, CoreDebug, FPU registers; CMSIS API — see note below |
 
 ## Usage Patterns
 
@@ -148,16 +148,22 @@ aaft
 
 ## Notes: `embedded/arm-none-eabi/`
 
-There is currently **no** `types/embedded/arm-none-eabi/` directory in this
-corpus. Type headers for Cortex-M newlib functions are **not yet generated** —
-previous extraction produced `void f(void)` for all signatures (DWARF parameter
-types were lost during extraction). Loading broken headers is worse than
-nothing.
+`types/embedded/arm-none-eabi/cortex-m.h` defines Cortex-M peripheral registers
+(NVIC, SCB, SysTick, MPU, DWT, CoreDebug, FPU) and CMSIS types:
 
-The corresponding zsig files in `zigns/embedded/arm-none-eabi/` **are correct**
-and useful for function identification via `zo` + `z/`.
+```r2
+to embedded/arm-none-eabi/cortex-m.h
+aaft
+```
 
-To regenerate, compile newlib with `-g` and use `tool/generate-zsig.py --types`:
+**Function signatures are not present.** Previous type headers generated from
+DWARF info resolved to `void f(void)` for all signatures — the extraction dropped
+every parameter and return type. Loading broken function headers is worse than
+nothing. The corresponding zsig files in `zigns/embedded/arm-none-eabi/` are
+correct and useful for function identification via `zo` + `z/`.
+
+To regenerate function signatures, compile newlib with `-g` and use
+`tool/generate-zsig.py --types`:
 ```bash
 ./tool/generate-zsig.py --lib path/to/debug/libc.a --types -o newlib-v7em-types.h
 ```

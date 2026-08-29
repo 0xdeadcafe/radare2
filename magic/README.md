@@ -25,6 +25,7 @@ built-in magic with vendor-specific and protocol-specific patterns.
 | File | Purpose | Formats Covered |
 |------|---------|-----------------|
 | `firmware.magic` | **Universal catch-all** — load this first | DJI, Rockchip, TRX, SEAMA, Netgear, D-Link, JBOOT, LZ4, SquashFS LZMA, Cisco IOS (stub), Icom (stubs), VxWorks (stub), Juniper (stub) |
+| `bosch_cppenc.magic` | Bosch VIP-X CPP-ENC container | Proprietary ROMFS flat image — use with `r2 -n` (raw mode) |
 | `cisco_ios.magic` | Cisco IOS ELF identification | IOS monolithic ELF (MIPS/PPC), self-extracting ZIP wrapper, IOS-XE, ROMMON, c1700 FEEDFACE+ZIP |
 | `cobham_bgan.magic` | Cobham SATCOM / Thrane & Thrane | TIIF container, BGAN .dl archive, MAIN_CPU image, eCos ARM flat binary |
 | `crypto_tables.magic` | Cryptographic algorithm tables | CRC-8, CRC-16, CRC-32, CRC-32C, AES S-boxes, SHA-256/SHA-1 constants, MD5 T-table, Blowfish, DES, ChaCha20, RC4 |
@@ -33,6 +34,7 @@ built-in magic with vendor-specific and protocol-specific patterns.
 | `proto_fingerprint.magic` | Protocol handler fingerprinting | DJI DUPC, HTTP, SNMP, MQTT, Modbus, Telnet, FTP, SSH/Dropbear, CoAP, LwM2M, TR-069, UPnP/SSDP, SIP, RTSP, IKEv2/IPsec, RADIUS, Diameter, SpaceX gRPC/BwpProxy |
 | `silabs_gbl.magic` | Silicon Labs Gecko Bootloader | GBL plaintext/encrypted images, application/bootloader/SE segments, ECDSA signature, D-Link Z-Wave OTA, Realtek Ameba Z-II |
 | `starlink.magic` | SpaceX Starlink firmware | sxverity container, gRPC binary fingerprints (SpaceX.API.Device), UserClass enum, Slate key-value store, BwpProxy command bus, UnlockService, STSafe HSM |
+| `uefi.magic` | UEFI / EDK2 firmware | EFI PE32+ executables, Firmware Volumes (FV/FFS), capsule updates, NvRam variable store, Intel Flash Descriptor, ME firmware, ACPI tables, Secure Boot databases |
 | `vxworks.magic` | VxWorks kernel images | VxWorks 7 kernel ELF (x86-64, ARM32, AArch64), DKM relocatable, .wrs_build_vars metadata, v5/v6 version banner, ROMFS, Wind River TFTP boot (.vxz) |
 
 ## Strategy: One File vs Many
