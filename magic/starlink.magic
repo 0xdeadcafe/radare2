@@ -1,0 +1,141 @@
+# starlink.magic — SpaceX Starlink firmware format signatures for radare2
+#
+# Install: cp starlink.magic ~/.local/share/radare2/magic/
+# Usage:   /m ~/.local/share/radare2/magic/starlink.magic
+#
+# Covers: sxverity container format, SpaceX gRPC binary fingerprints, Slate keys,
+#         BwpProxy command strings, UserClass enum detection
+#
+# Source sessions: 2026-05-09 / 2026-05-10 Starlink catson/catapult firmware analysis
+# Related findings:
+#   vault/Findings/STARLINK-APK-FIRMWARE-RECON-2026.md
+#   vault/Findings/STARLINK-RUNTIME-EXTRACTED-2026.md
+#   vault/Findings/AUTH_BYPASS_fd54cbdb_emc_ws_zero_auth.md
+#   vault/Findings/STARLINK-FRONTEND-GRPC-AUTH-TAXONOMY-2026.md
+
+# =============================================================================
+# sxverity container format
+#
+# SpaceX custom Merkle-hash integrity wrapper.  Content is NOT encrypted;
+# the 512-byte header is a hash tree (similar to dm-verity).
+#
+# Header layout (all LE):
+#   0x000  8   Magic "sxverity"
+#   0x008  4   Padding (0x00000000)
+#   0x00C  4   Total container size (LE32)
+#   0x010  4   Padding (0x00000000)
+#   0x014  4   Hash tree offset / hash count (LE32)
+#   0x018  4   Data payload size (LE32)
+#   0x01C  4   Data payload size (copy)
+#   0x020  4   Block flags (0x00000400 = 4096-byte blocks, typical)
+#   0x024  20  Hash block 1 (first 20 bytes of SHA-256 digest)
+#   ...        Additional 32-byte hash blocks up to offset 0x200
+#   0x200  ..  Embedded rom1fs filesystem ("-rom1fs-" magic)
+#
+# Recursive: each .sxv partition is itself an sxverity-wrapped rom1fs.
+# runtime.sxv is the outermost container → inner rom1fs → runtime.tar.zst
+# =============================================================================
+
+# Primary match: magic + mandatory zero pad at offset 8 (4 bytes = 0x00000000)
+# This filters strings like "sxverity\x01" that appear in file/dir names.
+0	string		sxverity\x00\x00\x00\x00	SpaceX sxverity firmware container
+>0x00c	lelong		x		\b, total_size=%u
+>0x014	lelong		x		\b, hash_tree_off=0x%08x
+>0x018	lelong		x		\b, data_size=%u
+>0x020	lelong		0x00000400	\b, block_size=4096
+>0x020	lelong		!0x00000400	\b, block_flags=0x%08x
+>0x200	string		-rom1fs-	\b, inner=rom1fs
+
+# =============================================================================
+# SpaceX gRPC binary fingerprints
+#
+# When a hit is found at offset N, cross-reference to find the handler:
+#   axt @ <hit_offset>
+# This reveals which functions reference the gRPC path string.
+# =============================================================================
+
+# SpaceX.API.Device gRPC service path — in user_terminal_frontend (Go static binary)
+0	string		SpaceX.API.Device	SpaceX Starlink device gRPC API binary
+>0	string		SpaceX.API.Device.Services	\b (device services API)
+
+# Starlink gRPC auth taxonomy protobuf enum (file offset 0xf4ca4d in frontend)
+# Wire: tag=2 type=LEN → repeated entries of {name, value}
+0	string		NO_USER\x10\x00\x12\x07\x0a\x03GOD	SpaceX UserClass enum definition (gRPC auth taxonomy)
+
+# Go proto package paths (statically embedded in Go binary)
+0	string		spacex.com/sx_command	SpaceX SensitiveCommand gRPC handler (Go)
+0	string		spacex.com/security/catapult_provisioning	SpaceX Catapult provisioning service (Go)
+
+# Auth metric channel names — unique to user_terminal_frontend
+0	string		frontend.grpc_auth.requests_as_god	SpaceX gRPC auth metrics (user_terminal_frontend)
+0	string		frontend.grpc_auth.signed_by_developer	SpaceX developer-key auth metric
+
+# SpaceX Router CA — ECDSA P-384, hardcoded at 0x8e9e6c in user_terminal_frontend
+# PEM begin marker embedded in Go binary's read-only data segment
+0	string		CN\x20=\x20SpaceX\x20Router\x20CA	SpaceX Router CA certificate (hardcoded)
+
+# =============================================================================
+# emc_web_socket_server (Slate/BwpProxy command bus) fingerprints
+#
+# These strings are embedded in emc_web_socket_server and the multi-call
+# uterm_binbox_user_terminal binary.  Each identifies a specific command bus.
+# Cross-reference with axt to find the dispatch function.
+# =============================================================================
+
+# Slate key for production gate — emc_web_socket_server auth check at 0x28430
+0	string		emc.test_device	SpaceX emc_web_socket_server production gate (Slate key)
+>0x28	string		This device is configured as Prod	\b, production guard present
+
+# WebSocket command bus — registered in message handler fcn.00029a04
+0	string		websocket.get_slate	SpaceX emc WebSocket slate read command
+0	string		websocket.set_slate	SpaceX emc WebSocket slate write command
+
+# BwpProxy satellite command bus strings (emc_web_socket_server + uterm_binbox)
+0	string		proxy_send_command_arm		SpaceX BwpProxy ARM satellite command
+0	string		proxy_send_command_disarm_all	SpaceX BwpProxy DISARM ALL satellite command
+0	string		proxy_gnc_pause			SpaceX BwpProxy GNC pause command
+0	string		proxy_gnc_unpause		SpaceX BwpProxy GNC unpause command
+0	string		proxy_set_int32			SpaceX BwpProxy integer register write
+0	string		proxy_set_fp			SpaceX BwpProxy float register write
+0	string		bwp_proxy_gnc_iss_ecef_state_upload	SpaceX BwpProxy ECEF position injection
+
+# Rocket/Bullwinkle source paths (build artifact strings in binaries)
+0	string		external/rocket~/src/flight/sat/all/user/EmcWebSocketServer.cc	SpaceX emc_web_socket_server (source: Rocket~/flight/sat)
+0	string		external/rocket~/src/bullwinkle/all/BwpProxyParser.cc		SpaceX BwpProxy parser (source: Rocket~/bullwinkle)
+
+# =============================================================================
+# Starlink unlock service fingerprints (uterm_binbox_user_terminal)
+# =============================================================================
+
+0	string		SpaceX.API.Device.Services.Unlock.UnlockService	SpaceX UnlockService gRPC (root SSH key injection)
+0	string		/root/.ssh/authorized_keys	SpaceX authorized_keys write target (unlock_service)
+0	string		Type 'falcon' to stop boot process	SpaceX U-Boot bootloader (Catson/Catapult)
+
+# =============================================================================
+# swupdate / sxverity signing key strings
+# =============================================================================
+
+0	string		swupdate_release_pubkey	SpaceX swupdate release signing key (Ed25519)
+0	string		swupdate_dev_pubkey	SpaceX swupdate dev signing key (Ed25519)
+0	string		unlock_verification_key	SpaceX unlock service Ed25519 verification key
+
+# =============================================================================
+# Starlink hardware variant / DSP firmware identifiers
+# =============================================================================
+
+0	string		sx,catson-gpio	SpaceX Catson device tree binding (Gen 2/3 flat dish)
+0	string		st,catson-sdhci	SpaceX Catson eMMC controller DT binding
+0	string		uterm_catapult	SpaceX Catapult user terminal variant (Gen 4 HP)
+0	string		SPACEX_CATSON_UTERM	SpaceX Catson user terminal boot image
+0	string		SPACEX_CATSON_TRANSCEIVER	SpaceX Catson transceiver firmware
+0	string		satellite_starlink_point_release	SpaceX Gauntlet CI pipeline tag
+0	string		ssh://git@stash:7999/sat/satcode.git	SpaceX satcode.git repository reference
+
+# =============================================================================
+# STSafe HSM / identity provisioning (connection_manager)
+# =============================================================================
+
+0	string		/dev/stsafe_i2c		SpaceX STSafe-A110 HSM device (connection_manager)
+0	string		/run/stsafe_cipher	SpaceX STSafe cipher output (setup_stsafe_identity)
+0	string		/run/stsafe_leaf.pem	SpaceX STSafe leaf cert output (setup_stsafe_identity)
+0	string		/run/identity_provider	SpaceX identity provider path (connection_manager)

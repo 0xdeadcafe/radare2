@@ -1,0 +1,168 @@
+# uefi.magic — UEFI / EFI firmware format signatures for radare2
+#
+# Identifies UEFI firmware images, PE/COFF EFI executables, capsule updates,
+# flash device images, and UEFI shell scripts.
+#
+# Use from r2: /m ~/.local/share/radare2/magic/uefi.magic
+# Install:     cp uefi.magic ~/.local/share/radare2/magic/
+#
+# Background:
+#   UEFI firmware is typically organised as a flash image containing:
+#     - Firmware Volume (FV): container with FFS (Firmware File System) modules
+#       - PE32/PE32+ EFI executables (DXE drivers, UEFI applications, PEI modules)
+#       - SMM (System Management Mode) drivers (critical for security)
+#     - GUID Partition Table (GPT) based flash layout
+#   Analysis targets:
+#     - `uefi-firmware-parser` / `UEFITool` for extraction
+#     - r2 to analyse individual PE32+ EFI executables
+
+# =============================================================================
+# EFI PE32+ Executables
+# Standard PE/COFF with MZ + PE header, subsystem 10-13 (EFI)
+# =============================================================================
+
+# EFI Application (subsystem 0x000A = 10)
+0       leshort 0x5A4D     MZ header (possible EFI executable)
+>0x3C   lelong  x          \b, PE offset: 0x%x
+>>0     string  PE\0\0     \b — PE header
+>>>4    leshort 0xAA64     \b, machine: AArch64 EFI
+>>>4    leshort 0x8664     \b, machine: x86-64 EFI
+>>>4    leshort 0x014C     \b, machine: i386 EFI
+>>>4    leshort 0xAA64     \b, arch: AArch64
+>>>92   leshort 0x000A     \b, subsystem: EFI Application
+>>>92   leshort 0x000B     \b, subsystem: EFI Boot Service Driver
+>>>92   leshort 0x000C     \b, subsystem: EFI Runtime Driver
+>>>92   leshort 0x000D     \b, subsystem: EFI ROM image
+>>>92   leshort 0x000E     \b, subsystem: Xbox (UEFI variant)
+>>>92   leshort 0x0010     \b, subsystem: Windows Boot Application
+
+# =============================================================================
+# UEFI Firmware Volume (FV)
+# Magic: _FVH at offset 40 (0x28) within the 72-byte EFI_FIRMWARE_VOLUME_HEADER
+# =============================================================================
+
+# Firmware Volume Header — magic at offset 40
+40      string  _FVH        UEFI Firmware Volume (FV)
+>0      string  x           \b, GUID: %.16s
+>16     lequad  x           \b, length: %lld bytes
+>36     lelong  x           \b, signature: 0x%08x
+>48     lelong  x           \b, attributes: 0x%08x
+>52     leshort x           \b, header_size: %d
+>56     leshort x           \b, checksum: 0x%04x
+
+# Sometimes found at offset 0 in extracted FV images
+0       string  \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x8D\x2B\xF1\xFF\x96\x76\x8B\x4C\xA9\x85\x27\x47\x07\x5B\x4F\x50  UEFI Firmware Volume (FV) — FFSGUID prefix
+
+# =============================================================================
+# EFI Firmware File System (FFS) file header
+# Each module inside an FV is an FFS file; header is 24 bytes
+# =============================================================================
+
+# FFS file: integrity check field at offset 16 must be non-zero (skip 0-bytes)
+# Type field at offset 18:
+#   0x01 = RAW, 0x02 = FREEFORM, 0x03 = SEC_CORE, 0x04 = PEI_CORE
+#   0x05 = DXE_CORE, 0x06 = PEIM, 0x07 = DRIVER, 0x08 = COMBINED_PEIM_DRIVER
+#   0x09 = APPLICATION, 0x0A = SMM (security-critical!)
+#   0x0B = FIRMWARE_VOLUME_IMAGE, 0x0C = COMBINED_SMM_DXE
+#   0x0D = SMM_CORE, 0x0F = MM_STANDALONE, 0x10 = MM_CORE_STANDALONE
+# FFS GUID at offset 0 varies per module — detect by type field only
+
+# =============================================================================
+# UEFI Capsule Update Format
+# Used by Windows Update, fwupd, and vendor update tools
+# =============================================================================
+
+# Standard EFI capsule GUID: BD57C40E-C851-4E24-A9CC-BE94B3513F77
+0       string  \xBD\x57\xC4\x0E\xC8\x51\x4E\x24\xA9\xCC\xBE\x94\xB3\x51\x3F\x77  UEFI Capsule Update (EFI_CAPSULE_GUID)
+>16     lequad  x           \b, header_size: %lld
+>24     lelong  x           \b, flags: 0x%08x
+>28     lequad  x           \b, capsule_image_size: %lld
+
+# Windows System Firmware Capsule GUID: 6DCBD5ED-E82D-4C44-BDA1-7194199AD92A
+0       string  \x6D\xCB\xD5\xED\xE8\x2D\x4C\x44\xBD\xA1\x71\x94\x19\x9A\xD9\x2A  Windows UEFI System Firmware Capsule
+
+# =============================================================================
+# UEFI Variable Store (NvRam / NVRAM)
+# Found in flash images at the NV storage FV
+# =============================================================================
+
+# Variable Store GUID: AAF32C78-947B-439A-A180-2E144EC37792
+0       string  \x78\x2C\xF3\xAA\x7B\x94\x9A\x43\xA1\x80\x2E\x14\x4E\xC3\x77\x92  UEFI Variable Store (NvRam FV)
+>16     lelong  x           \b, size: 0x%08x
+>20     byte    x           \b, format: 0x%02x
+>21     byte    x           \b, state: 0x%02x
+
+# =============================================================================
+# UEFI Flash Descriptor (Intel Flash Descriptor)
+# Located at offset 0 or 0x1000 in SPI flash images
+# =============================================================================
+
+# Flash Descriptor signature: 5A A5 F0 0F
+16      string  \x5A\xA5\xF0\x0F  Intel SPI Flash Descriptor (FLVALSIG)
+>0      lelong  x               \b, signature bytes @ 0x%x
+>20     lelong  x               \b, FLMAP0 (ME/BIOS/GbE regions)
+
+# =============================================================================
+# Intel ME (Management Engine) firmware region identifiers
+# =============================================================================
+
+# ME firmware header: $MN2 or $MAN
+0       string  $MN2        Intel ME firmware manifest ($MN2)
+>4      lelong  x           \b, size: %d DWORDs
+>8      lelong  x           \b, version: 0x%08x
+
+0       string  $MAN        Intel ME firmware manifest ($MAN)
+>4      lelong  x           \b, size: %d DWORDs
+
+# ME Code partition: LZMA compressed
+# Magic at offset 0 in ME partition
+0       string  \x5D\x00\x00  LZMA compressed stream (likely Intel ME partition)
+
+# =============================================================================
+# EDK2 / TianoCore Build artifacts
+# Found in development images and extracted FV modules
+# =============================================================================
+
+# EDK2 module entry with DEBUG string prefix
+0       string  ASSERT      EDK2 ASSERT() macro string (debug build artifact)
+0       string  DEBUG_ASSERT EDK2 DEBUG_ASSERT macro (FW debug build)
+
+# =============================================================================
+# ACPI Tables (found embedded in UEFI firmware volumes)
+# =============================================================================
+
+0       string  DSDT        ACPI Differentiated System Description Table (DSDT)
+>4      lelong  x           \b, length: %d bytes
+>8      byte    x           \b, revision: %d
+>10     string  x           \b, OEM: %.6s
+
+0       string  SSDT        ACPI Secondary System Description Table (SSDT)
+>4      lelong  x           \b, length: %d bytes
+
+0       string  FACP        ACPI Fixed ACPI Description Table (FADT)
+0       string  APIC        ACPI Multiple APIC Description Table (MADT)
+0       string  MCFG        ACPI PCI Express Memory-mapped Configuration (MCFG)
+0       string  SRAT        ACPI System Resource Affinity Table (SRAT)
+0       string  SLIT        ACPI System Locality Information Table (SLIT)
+
+# =============================================================================
+# Secure Boot / key database
+# =============================================================================
+
+# Authenticated UEFI variable (EFI_VARIABLE_AUTHENTICATION_2)
+# TIME_BASED_AUTHENTICATED_WRITE_ACCESS descriptor
+0       string  \x3D\x01\x00\x00\x00\x00\x00\x00  UEFI Authenticated Variable (EFI_VARIABLE_AUTHENTICATION_2)
+
+# EFI_CERT_TYPE_PKCS7 GUID: 4AAFD29D-68DF-49EE-8AA9-347D375665A7
+0       string  \x9D\xD2\xAF\x4A\xDF\x68\xEE\x49\x8A\xA9\x34\x7D\x37\x56\x65\xA7  EFI_CERT_TYPE_PKCS7 (Secure Boot signature)
+
+# EFI_CERT_X509 GUID: A5C059A1-94E4-4AA7-87B5-AB155C2BF072
+0       string  \xA1\x59\xC0\xA5\xE4\x94\xA7\x4A\x87\xB5\xAB\x15\x5C\x2B\xF0\x72  EFI_CERT_X509 (Secure Boot X.509 certificate)
+
+# =============================================================================
+# UEFI Shell Script
+# =============================================================================
+
+0       string  #!          UEFI shell script (hashbang)
+0       string  @echo -off  UEFI shell script (@echo -off)
+0       string  fs0:        UEFI shell filesystem reference (fs0:)

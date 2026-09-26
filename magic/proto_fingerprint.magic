@@ -1,0 +1,316 @@
+# proto_fingerprint.magic — Protocol handler identification in firmware binaries
+#
+# Identifies which network protocols a binary implements by scanning for
+# characteristic string constants and byte sequences that protocol handlers
+# embed in their code/data sections.
+#
+# Use from r2: /m ~/.local/share/radare2/magic/proto_fingerprint.magic
+# Or from a profile: /m magic/proto_fingerprint.magic
+#
+# Install: cp proto_fingerprint.magic ~/.local/share/radare2/magic/
+#
+# When a hit is found, the offset points to the string/constant in the binary.
+# Cross-reference it (axt @ <offset>) to find the handling function.
+
+# =============================================================================
+# DJI DUPC 0x55 Protocol
+# Wi-Fi modules: P3C/P3S/P3_4K m0700, m2700
+# Reference: skel/.local/share/radare2/docs/protocols/dji-dupc-0x55.md
+# =============================================================================
+0	string	process_packet	DJI DUPC protocol handler (process_packet)
+0	string	dji_printf	DJI firmware logging (dji_printf)
+0	string	cmd_set	DJI DUPC command set field
+0	string	DUPC	DJI DUPC protocol string
+# DJI DUPC magic + length header: 0x55 <len_lo> <len_hi:6|ver:2>
+0	string	\x55\x0f\x04	DJI DUPC 0x55 packet header (magic=0x55)
+
+# =============================================================================
+# HTTP
+# =============================================================================
+0	string	HTTP/1.	HTTP/1.x response handler
+0	string	HTTP/2	HTTP/2 response handler
+0	string	Content-Type:	HTTP Content-Type header handler
+0	string	Authorization:	HTTP Authorization header handler
+0	string	WWW-Authenticate:	HTTP WWW-Authenticate handler (auth challenge)
+0	string	application/json	HTTP JSON API handler
+0	string	text/html	HTTP HTML content handler
+
+# =============================================================================
+# SNMP
+# =============================================================================
+0	string	snmpd	SNMP daemon binary
+0	string	NET-SNMP	Net-SNMP library
+0	string	1.3.6.1	SNMP OID prefix (MIB II)
+0	string	snmpTrap	SNMP trap handler
+
+# =============================================================================
+# MQTT
+# =============================================================================
+0	string	mqtt	MQTT protocol handler (lowercase)
+0	string	MQTT	MQTT protocol identifier (uppercase)
+0	string	MQIsdp	MQTT v3.1 protocol identifier
+
+# =============================================================================
+# Modbus
+# =============================================================================
+0	string	modbus	Modbus protocol handler (lowercase)
+0	string	Modbus	Modbus protocol handler (titlecase)
+0	string	MODBUS	Modbus protocol handler (uppercase)
+
+# =============================================================================
+# Telnet
+# =============================================================================
+0	string	telnetd	Telnet daemon
+0	string	utelnetd	Micro-telnetd daemon (OpenWrt)
+# IAC (Interpret As Command) byte sequence
+0	string	\xff\xfd	Telnet IAC DO option negotiation
+0	string	\xff\xfb	Telnet IAC WILL option negotiation
+
+# =============================================================================
+# FTP
+# =============================================================================
+0	string	vsftpd	vsftpd FTP server
+0	string	proftpd	ProFTPD server
+# FTP service banner
+0	string	220 FTP	FTP server 220 greeting
+0	string	230 Login	FTP login success response
+
+# =============================================================================
+# SSH / Dropbear
+# =============================================================================
+0	string	SSH-2.0-	SSH-2.0 version string
+0	string	SSH-1.99	SSH backward-compatible version string
+0	string	dropbear	Dropbear SSH daemon/client
+
+# =============================================================================
+# CoAP (Constrained Application Protocol — IoT/embedded)
+# =============================================================================
+0	string	coap://	CoAP URI scheme
+0	string	coap+tcp	CoAP over TCP URI scheme
+
+# =============================================================================
+# LwM2M / OMA DM (device management — IoT firmware)
+# =============================================================================
+0	string	lwm2m	LwM2M device management
+0	string	oma-dm	OMA Device Management
+
+# =============================================================================
+# TR-069 (CWMP — CPE WAN Management Protocol, routers/gateways)
+# =============================================================================
+0	string	cwmp:	TR-069 CWMP namespace
+0	string	urn:dslforum-org	DSLForum TR-069 URN
+
+# =============================================================================
+# UPnP / SSDP (router firmware, media devices)
+# =============================================================================
+0	string	M-SEARCH * HTTP	UPnP SSDP M-SEARCH discovery
+0	string	SSDP/1.1	SSDP protocol version
+0	string	urn:schemas-upnp-org	UPnP device schema URN
+0	string	UPnP/1.	UPnP version string
+
+# =============================================================================
+# SIP (VoIP — commonly found in BGAN terminals, enterprise routers)
+# =============================================================================
+0	string	INVITE sip:	SIP INVITE method
+0	string	SIP/2.0	SIP/2.0 response line
+0	string	Via: SIP	SIP Via header
+0	string	asterisk	Asterisk SIP PBX
+
+# =============================================================================
+# RTSP (streaming — cameras, drone video links)
+# =============================================================================
+0	string	RTSP/1.0	RTSP/1.0 response
+0	string	rtsp://	RTSP URI scheme
+
+# =============================================================================
+# IKEv2 / IPsec (VPN firmware — firewalls, BGAN terminals)
+# =============================================================================
+0	string	ISAKMP	IKEv2/ISAKMP handler
+0	string	IKE_SA_INIT	IKEv2 SA_INIT exchange type
+0	string	ikev2	IKEv2 implementation string
+0	string	racoon	Racoon IKE daemon
+0	string	strongswan	strongSwan IPsec
+
+# =============================================================================
+# RADIUS (authentication — common in enterprise/satellite terminals)
+# =============================================================================
+0	string	radiusd	RADIUS daemon
+0	string	RADIUS	RADIUS protocol string
+
+# =============================================================================
+# Diameter (AAA — successor to RADIUS, found in LTE/satellite systems)
+# =============================================================================
+0	string	Diameter	Diameter protocol handler
+0	string	diameter	Diameter protocol (lowercase)
+
+# =============================================================================
+# SpaceX Starlink gRPC / BwpProxy protocol fingerprints
+#
+# Source: 2026-05-10 catson/catapult firmware analysis
+# Findings: STARLINK-FRONTEND-GRPC-AUTH-TAXONOMY-2026, AUTH_BYPASS_fd54cbdb
+# =============================================================================
+
+# SpaceX.API.Device gRPC service namespace
+0	string		SpaceX.API.Device	SpaceX Starlink device gRPC API (SpaceX.API.Device.*)
+0	string		SpaceX.API.Device.Services.Unlock	SpaceX UnlockService gRPC (root SSH key injection)
+
+# Go protobuf package paths (embedded in static Go binaries)
+0	string		spacex.com/sx_command	SpaceX SensitiveCommand gRPC package (Go)
+0	string		spacex.com/security/catapult_provisioning	SpaceX Catapult provisioning gRPC (Go)
+
+# gRPC auth metric channel names (unique to user_terminal_frontend)
+0	string		frontend.grpc_auth.	SpaceX Starlink gRPC auth telemetry handler
+0	string		grpc_god_user_on_prod_ut	SpaceX god-user alert metric (user_mmut.project.so)
+0	string		grpc_dev_key_on_prod_ut	SpaceX dev-key alert metric (user_mmut.project.so)
+
+# Slate key-value store protocol (emc_web_socket_server)
+0	string		emc.test_device		SpaceX Slate production gate key (emc_web_socket_server :8065)
+0	string		websocket.get_slate	SpaceX emc WebSocket slate-read protocol handler
+
+# BwpProxy satellite command bus (emc_web_socket_server + uterm_binbox)
+0	string		proxy_send_command_arm		SpaceX BwpProxy satellite ARM command handler
+0	string		proxy_send_command_disarm_all	SpaceX BwpProxy satellite DISARM ALL handler
+0	string		proxy_gnc_pause			SpaceX BwpProxy GNC pause command handler
+0	string		bwp_proxy_gnc_iss_ecef_state_upload	SpaceX BwpProxy ECEF position injection handler
+
+# Unlock service (uterm_binbox_user_terminal)
+0	string		/root/.ssh/authorized_keys	SpaceX unlock_service SSH key write target
+
+# =============================================================================
+# DNP3 (Distributed Network Protocol 3 — SCADA/ICS power grid, water systems)
+# =============================================================================
+0	string	dnp3	DNP3 protocol handler (lowercase)
+0	string	DNP3	DNP3 protocol handler (uppercase)
+# DNP3 start bytes: 0x0564 (big-endian sync word)
+0	beshort	0x0564	DNP3 frame start bytes (0x0564 sync word)
+
+# =============================================================================
+# IEC 60870-5-104 (IEC-104 — power grid telecontrol over TCP/IP)
+# =============================================================================
+0	string	iec104	IEC 60870-5-104 SCADA protocol handler
+0	string	IEC104	IEC 60870-5-104 SCADA protocol handler (uppercase)
+# IEC-104 APCI start byte is always 0x68 followed by length
+0	byte	0x68	IEC 60870-5 APCI start byte (0x68)
+
+# =============================================================================
+# IEC 61850 (power substation automation — MMS, GOOSE, SV)
+# =============================================================================
+0	string	iec61850	IEC 61850 substation automation protocol
+0	string	IEC61850	IEC 61850 protocol (uppercase)
+0	string	GOOSE	IEC 61850 GOOSE (Generic Object-Oriented Substation Event)
+0	string	MMS_	IEC 61850 MMS (Manufacturing Message Specification) prefix
+0	string	libiec61850	libiec61850 open-source IEC 61850 library
+
+# =============================================================================
+# Modbus RTU / TCP (industrial, PLC communication)
+# Already has string matches above; add byte-level TCP ADU detection
+# =============================================================================
+# Modbus TCP: transaction ID (2B) + protocol ID 0x0000 (2B) + length (2B) + unit ID (1B)
+2	beshort	0x0000	Modbus TCP ADU (protocol identifier = 0x0000)
+
+# =============================================================================
+# BACnet (Building Automation and Control networks — HVAC, lighting, access control)
+# =============================================================================
+0	string	BACnet	BACnet protocol string
+0	string	bacnet	BACnet protocol (lowercase)
+0	string	bacpypes	BACpypes Python BACnet library
+# BACnet/IP (BVLC) type byte: 0x81 followed by function code
+0	byte	0x81	BACnet/IP BVLC header (0x81)
+# BACnet NPDU network layer: version 1 = 0x01
+0	byte	0x01	BACnet NPDU version byte
+
+# =============================================================================
+# EtherCAT (Ethernet-based real-time fieldbus — industrial motion control)
+# =============================================================================
+0	string	EtherCAT	EtherCAT fieldbus protocol string
+0	string	ethercat	EtherCAT protocol (lowercase)
+0	string	ec_master	EtherCAT master reference (IgH EtherCAT Master)
+0	string	soem	Simple Open EtherCAT Master (SOEM) library
+
+# =============================================================================
+# PROFINET (Siemens industrial Ethernet protocol)
+# =============================================================================
+0	string	PROFINET	PROFINET protocol string
+0	string	profinet	PROFINET protocol (lowercase)
+0	string	pn_io	PROFINET I/O reference
+# PROFINET RT EtherType: 0x8892
+# (byte-level match only meaningful in Ethernet frame context)
+
+# =============================================================================
+# OPC UA (Open Platform Communications Unified Architecture — ICS/SCADA)
+# =============================================================================
+0	string	opcua	OPC UA protocol handler (lowercase)
+0	string	OPC UA	OPC UA protocol string
+0	string	open62541	open62541 OPC UA C library
+0	string	opc.tcp://	OPC UA TCP endpoint URL scheme
+# OPC UA Binary protocol: Hello message starts with "HEL"
+0	string	HEL\x46	OPC UA HEL (Hello) binary message
+0	string	OPN\x46	OPC UA OPN (OpenSecureChannel) binary message
+0	string	MSG\x46	OPC UA MSG (service request/response) binary message
+
+# =============================================================================
+# Zigbee / IEEE 802.15.4 (IoT, smart home, building automation)
+# =============================================================================
+0	string	ZigBee	ZigBee wireless protocol string
+0	string	zigbee	ZigBee protocol (lowercase)
+0	string	zboss	ZBOSS ZigBee stack
+0	string	z-stack	Texas Instruments Z-Stack ZigBee
+0	string	zigpc	ZigBee Platform Controller
+
+# =============================================================================
+# Z-Wave (smart home mesh network — door locks, sensors)
+# =============================================================================
+0	string	zwave	Z-Wave protocol handler (lowercase)
+0	string	Z-Wave	Z-Wave protocol string
+0	string	zwaveip	Z/IP (Z-Wave over IP) protocol
+
+# =============================================================================
+# Thread / Matter (Apple/Google smart home — IoT)
+# =============================================================================
+0	string	openthread	OpenThread (Thread networking stack)
+0	string	matter-controller	Matter home automation controller
+0	string	chip-tool	CHIP/Matter development tool
+
+# =============================================================================
+# AMQP (Advanced Message Queuing Protocol — IoT messaging)
+# =============================================================================
+# AMQP frame header starts with "AMQP" for protocol header
+0	string	AMQP	AMQP protocol header / connection frame
+# RabbitMQ AMQP client
+0	string	rabbitmq	RabbitMQ AMQP broker/client
+
+# =============================================================================
+# WebSocket (upgrades from HTTP — increasingly common in embedded web UIs)
+# =============================================================================
+0	string	Upgrade: websocket	HTTP WebSocket upgrade request
+0	string	Sec-WebSocket-Key:	WebSocket handshake key header
+0	string	258EAFA5-E914-47DA-95CA-C5AB0DC85B11	WebSocket GUID (RFC 6455 magic UUID)
+
+# =============================================================================
+# XMPP (Jabber — IoT device messaging, some SATCOM terminals)
+# =============================================================================
+0	string	jabber:client	XMPP/Jabber client stream namespace
+0	string	jabber:iq:	XMPP IQ stanza namespace prefix
+
+# =============================================================================
+# WireGuard (modern VPN — increasingly in embedded routers)
+# =============================================================================
+0	string	wireguard	WireGuard VPN string
+0	string	WireGuard	WireGuard VPN (titlecase)
+# WireGuard handshake init: type=1 (LE 4-byte) followed by reserved 3 bytes
+0	lelong	0x00000001	WireGuard handshake initiation (type=1, check for WG context)
+
+# =============================================================================
+# NETCONF / YANG (network device management — IETF RFC 6241)
+# =============================================================================
+0	string	netconf	NETCONF network configuration protocol
+0	string	urn:ietf:params:xml:ns:netconf	NETCONF XML namespace
+0	string	urn:ietf:params:netconf	NETCONF capability URN prefix
+
+# =============================================================================
+# gNMI (gRPC Network Management Interface — modern YANG/gRPC telemetry)
+# =============================================================================
+0	string	gnmi.gNMI	gNMI gRPC service definition
+0	string	gnmi.GetRequest	gNMI Get RPC
+0	string	gnmi.SetRequest	gNMI Set RPC (configuration write)
+0	string	gnmi.SubscribeRequest	gNMI Subscribe (streaming telemetry)

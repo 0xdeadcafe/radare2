@@ -1,0 +1,9 @@
+# Bosch CPP-ENC VIP X H.264 encoder module (vip_x.app1)
+# Bytes at offset 0: 80 02 00 00 = 0x80020000 big-endian
+0	belong	0x80020000	Bosch CPP-ENC VIP X application module
+>4	belong	0x00020000	\b, CPP-ENC platform
+>8	lelong	x	\b, load_region=0x%08x
+
+# Bosch CPP-ENC DLL module (*.dll)
+0	beshort	0xC200	Bosch CPP-ENC DLL module
+>2	beshort	x	\b, type=0x%04x

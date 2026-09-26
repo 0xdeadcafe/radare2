@@ -1,0 +1,94 @@
+# Icom Radio Firmware Container Signatures
+# Source: aether session 2026-05-22
+#   905E120.dat (IC-905 v3.92), 705E140.dat (IC-705 v4.52),
+#   7100_fu_release_e6.exe (IC-7100 firmup, Borland C++ Builder PE32)
+#
+# Install: cp icom_firmware.magic ~/.local/share/radare2/magic/
+# Usage:   /m ~/.local/share/radare2/magic/icom_firmware.magic
+#
+# Key status for AES containers:
+#   IC-905 / IC-705: OUT-OF-BAND — key NOT embedded in DAT file.
+#   Requires IC-905 / IC-705 Firmware Update Software (separate Icom download).
+#   See: vault/ArchSpecs/maps/icom_ic905_dat_container.md
+
+# =============================================================================
+# Icom "44xxxxxx" DAT firmware container family
+#
+# Common header structure (both IC-905 and IC-705):
+#   [0x00-0x03]  magic (4 bytes)  — product-specific
+#   [0x04-null]  version string   — null-terminated ASCII, format:
+#                  "X.XX-E001.XX-<sub>-E00X.XX-<sub>"
+#   [ver_null+2] header_size u32 LE = 0x9c (156 bytes total header)
+#   [0x3e/0x3a]  data_start  u32 LE = 0xc0 (192 bytes) — IC-905 / IC-705
+#   [0xc0-EOF]   AES-encrypted payload, entropy ≈ 8.000 bits/byte
+#
+# Products confirmed in this family (first byte always 0x44):
+#   IC-905  magic = 44 22 00 99   (22 MHz and up SDR transceiver, 2022)
+#   IC-705  magic = 44 00 77 55   (all-band portable SDR, 2020)
+# =============================================================================
+
+# ---- IC-905 ----
+# Observed: 905E120.dat (v3.92), SHA256 of .dat: 8f62ce196bf7903be13319ed56b3cce12678ea55c27f303a69b43dee03c74e7b
+# Encryption: AES (mode/key TBD) — key not in file
+# Library entry: 4bce5f94aa13d58397b9039b72c24dab56d7a320af5d7b73a2056a674a3a4f72
+0	string	\x44\x22\x00\x99	Icom IC-905 firmware update container (AES-encrypted)
+>4	string	x			\b, version: %.80s
+>0x3e	lelong	x			\b, header_size=0x%02x
+>0x42	lelong	x			\b, payload_offset=0x%02x
+
+# ---- IC-705 ----
+# Observed: 705E140.dat (v4.52), SHA256 of .dat: 132383f8388641d02d0fadaccf9878d01a1960fa77a028328f0eb33dcfbc147b
+# Note: version string ends with \x02 byte before null terminator
+# header_size field is at 0x3a (not 0x3e) due to shorter version string
+# Library entry: ee4336193485790f8addcb15af79cb92aec701bb70d3734b176af446dde958d7
+0	string	\x44\x00\x77\x55	Icom IC-705 firmware update container (AES-encrypted)
+>4	string	x			\b, version: %.80s
+>0x3a	lelong	x			\b, header_size=0x%02x
+>0x3e	lelong	x			\b, payload_offset=0x%02x
+
+# =============================================================================
+# Icom "FIRM" DAT container (older products — AP-90M, etc.)
+#
+# Structure (52-byte big-endian header):
+#   [0x00] magic     = "FIRM"
+#   [0x04] hdr_size  = 0x34 (52)
+#   [0x08] timestamp = Unix timestamp BE
+#   [0x0C] ver_hi    u32 BE
+#   [0x10] ver_lo    u32 BE
+#   [0x14] payload_count u32 BE
+#   [0x34-EOF] ELF decompressor stub → LZMA VxWorks kernel
+#
+# Products: Icom AP-90M v2 (maritime AP, VxWorks 6.9 MIPS32 BE)
+# =============================================================================
+0	string	FIRM	Icom FIRM firmware container (VxWorks/LZMA)
+>4	belong	x	\b, hdr_size=%d
+>8	belong	x	\b, timestamp=0x%08x
+>0x14	belong	x	\b, payload_count=%d
+>0x1c	belong	x	\b, payload_size=%d
+
+# =============================================================================
+# IC-7100 firmware update EXE (embedded firmware, Borland C++ Builder)
+#
+# The 7100_fu_release_e6.exe embeds ~2.27MB of firmware in its .data section.
+# No AES S-box present; cipher unknown (possibly XOR or plain binary).
+# USB interface: Silicon Labs CP2102 (VID_10C4:PID_EA60) — USB-serial.
+# Identified as standard PE32 executable; use normal PE analysis.
+# =============================================================================
+# (No separate magic — identified as standard Windows PE)
+
+# ---- Icom DU3 ----
+# Observed: 7300MK2_102.dat (v3.12/1.02)
+# Encryption: AES (mode TBD) — key not in file, not derivable from Ipars
+# Payload at 0xC2 (16-byte aligned). 136-byte extended header at 0x38.
+# Library entry: 51a843bd0d79d8e5f3e5085dfb624897b625a7944ab25da0ce9ea65e2d3c99d7
+0	string	\x44\x55\x33\x00	Icom DU3 firmware update container (AES-encrypted, key unknown)
+>4	string	x			\b, version: %.40s
+
+# ---- Icom IC-R8600 ----
+# Observed: R8600_135.dat (v1.35) — LZSS compressed, NO encryption
+# Magic: 0x88118833 (LE u32 at offset 0)
+# Firmware compressed data at 0x10044 (decompressed size u32 LE at 0x10040)
+# LZSS: 4KB dict, init=0xFEE, LSB-first, 12-bit+4-bit back-ref, 3–18 bytes/ref
+# Reference: gist x27/637c2a5d4ff813c86c84243cc2f100ca
+0	lelong	0x88118833	Icom IC-R8600 firmware bundle (LZSS compressed, no AES)
+>0x10040	lelong	x	\b, decompressed_size=%d

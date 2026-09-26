@@ -1,0 +1,72 @@
+{
+  "binary": "C1900-UN.BIN",
+  "gp_base": {},
+  "structures": {
+    "ios_setjmp": {
+      "addr": "0x819dd960",
+      "call_order": 0
+    },
+    "boot_init_exception": {
+      "addr": "0x819dea84",
+      "call_order": 1
+    },
+    "boot_clear_bss": {
+      "addr": "0x819debc0",
+      "call_order": 2
+    },
+    "ios_kernel_init": {
+      "addr": "0x819cd4e8",
+      "call_order": 3
+    },
+    "boot_platform_init": {
+      "addr": "0x810dd284",
+      "call_order": 4
+    },
+    "boot_call_5": {
+      "addr": "0x81427b1c",
+      "call_order": 5
+    },
+    "boot_call_6": {
+      "addr": "0x810de408",
+      "call_order": 6
+    },
+    "boot_call_7": {
+      "addr": "0x819dd900",
+      "call_order": 7
+    },
+    "boot_call_8": {
+      "addr": "0x81000688",
+      "call_order": 8
+    },
+    "boot_call_9": {
+      "addr": "0x819de3f0",
+      "call_order": 9
+    },
+    "boot_call_10": {
+      "addr": "0x819dd900",
+      "call_order": 10
+    },
+    "boot_call_11": {
+      "addr": "0x81000688",
+      "call_order": 11
+    },
+    "ios_registry_add_list": {
+      "addr": "0x8339096c",
+      "callers": 4380
+    },
+    "ios_registry_add_case": {
+      "addr": "0x83390e68",
+      "callers": 7465
+    },
+    "ios_registry_add_pid_list": {
+      "addr": "0x83392538",
+      "callers": 1
+    },
+    "http_server": {
+      "addr": "0x829857fc"
+    },
+    "snmp_handler": {
+      "addr": "0x8355d36c"
+    }
+  }
+}

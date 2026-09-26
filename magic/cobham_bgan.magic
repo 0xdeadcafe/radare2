@@ -1,0 +1,41 @@
+# Cobham SATCOM / Thrane & Thrane / Viasat BGAN terminal firmware signatures
+# Derived from analysis of Explorer 100/110, 500/300, and 710 firmware images
+#
+# Install: cp cobham_bgan.magic ~/.local/share/radare2/magic/
+# Usage:   /m cobham_bgan.magic
+
+# =============================================================================
+# TIIF — Thrane & Thrane Image Install Format
+# =============================================================================
+# Used by Explorer 710, 5075, and newer Linux-based BGAN terminals
+# Contains PKCS7-signed manifest + multiple sub-images (kernel, rootfs, app, etc.)
+0	string		FIITTIIF	Cobham SATCOM TIIF firmware container
+>8	lelong		x		\b, version 0x%08x
+>0x20	string		tt:		\b, manifest: %.60s
+>0x40	string		tt37		\b, build tag: %.40s
+>0x64	string		products=	\b, %.20s
+
+# =============================================================================
+# Cobham BGAN .dl firmware archive (Explorer 500/300/700 series)
+# =============================================================================
+# POSIX tar containing: manifest (CRC32 list), MAIN_CPU (custom header+gzip), 
+# dsp/ (DSP images), lua/ (web UI scripts)
+# The MAIN_CPU sub-image has a custom header:
+0	belong		0xFEDEABBA	Cobham BGAN MAIN_CPU firmware image
+>4	belong		0xDEADBEAD	\b, magic2 confirmed
+>0x10	string		tt37		\b, build: %.20s
+>0x30	string		Build-		\b, tag: %.30s
+
+# =============================================================================
+# Cobham BGAN monolithic firmware (.APP — Explorer 100/110)
+# =============================================================================
+# Flat ARM binary for eCos RTOS, no filesystem
+# Identified by the entry point pattern and build strings
+0	string		\x00\x00\xa0\xe1	Possible ARM eCos firmware (mov r0, r0 NOP)
+
+# =============================================================================
+# BGAN DSP sub-images
+# =============================================================================
+# Found in dsp/asica/, dsp/asicb/, dsp/rfic02/ directories within .dl archives
+# These are raw DSP microcode blobs, typically < 100KB each
+# No reliable magic — identified by directory structure and context
