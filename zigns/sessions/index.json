@@ -61,18 +61,6 @@
         ],
         "source_binary": "5716572fb55ea25f"
     },
-    "de2cc34b9686e5da": {
-        "entry_count": 510,
-        "function_count": 170,
-        "named_pct": 0,
-        "note": "Original 753-entry self-referential session (all fcn.* names). Pruned: file retained as reduced zsig (510 entries) to preserve index integrity. Zero cross-binary value \u2014 entries are address-keyed, not name-keyed.",
-        "sample_names": [
-            "fcn.0000ad80",
-            "fcn.00010f50",
-            "fcn.00025830"
-        ],
-        "source_binary": "de2cc34b9686e5da"
-    },
     "f29d5e39bd05d704": {
         "entry_count": 313,
         "function_count": 298,

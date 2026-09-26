@@ -100,6 +100,7 @@ skel/.local/share/radare2/   (deployed to ~/.local/share/radare2/ by skel/instal
 │   ├── debian/              # debian-large tier (amd64/arm64/armhf/i386)
 │   ├── dji/                 # vendor tier
 │   ├── embedded/            # core tier (FreeRTOS + Newlib Cortex-M)
+│   ├── glibc/               # core tier (glibc arm32/arm64/x86)
 │   ├── go/                  # vendor tier
 │   ├── juniper/             # vendor tier
 │   ├── macos/               # vendor tier (libSystem + libm)
@@ -115,7 +116,6 @@ skel/.local/share/radare2/   (deployed to ~/.local/share/radare2/ by skel/instal
 ├── scripts/               # → ~/.local/share/radare2/scripts/
 │   └── windows-sinks.r2     # PE security sink labeler (sourced by windows profiles)
 ├── symbols/               # → ~/.local/share/radare2/symbols/
-├── plugins/               # → ~/.local/share/radare2/plugins/  (Modality plugin.py)
 ├── modality/              # → ~/.local/share/radare2/modality/  (angr/Z3 bridge source)
 ├── tool/                  # Content generators (run from repo, not installed)
 ├── coverage.json          # Arch/vendor coverage matrix
